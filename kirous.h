@@ -19,7 +19,7 @@ class chessUI {
         bool Init = false;
         bool playerTurn = true;
         int ch;
-        int ret;
+        int ret = 0;
 
     public:
         chessUI();

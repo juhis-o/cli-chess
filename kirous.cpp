@@ -56,14 +56,22 @@ void chessUI::freeSelect(ChessBoard &cBoard){
 
 void chessUI::enterPressed(ChessBoard &cBoard) {
 	if(!selected) {
-		if(!(cBoard.board[currentLoc.h][currentLoc.w]->chessChar == ' ')) {
-			selectedLoc = currentLoc;
-			selected = true;
+		if (currentLoc.h >= 0 && currentLoc.h < cBoard.board.size() &&
+            currentLoc.w >= 0 && currentLoc.w < cBoard.board[0].size()) {
+			if(!(cBoard.board[currentLoc.h][currentLoc.w]->isEmpty)) {
+				selectedLoc = currentLoc;
+				selected = true;
+			}
 		}
+		else ret = -100;
 	}
 	else {
-		ret = cBoard.board[selectedLoc.h][selectedLoc.w]->move(currentLoc, selectedLoc, cBoard.board);
-		selected = false;
+		if (currentLoc.h >= 0 && currentLoc.h < cBoard.board.size() &&
+            currentLoc.w >= 0 && currentLoc.w < cBoard.board[0].size()) {
+				ret = cBoard.board[selectedLoc.h][selectedLoc.w]->move(currentLoc, selectedLoc, cBoard.board);
+				selected = false;
+			}
+		else ret = -100;
 	}
 	updateInterface(cBoard);
 }
