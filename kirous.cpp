@@ -3,11 +3,11 @@
 chessUI::chessUI() {
 	initscr();
 	start_color();
-	init_pair(1, COLOR_RED, COLOR_WHITE); //Red player on white square
-    init_pair(2, COLOR_RED, COLOR_BLACK); //Red player on black square
-	init_pair(3, COLOR_BLUE, COLOR_WHITE); //Blue player on white square
-    init_pair(4, COLOR_BLUE, COLOR_BLACK); //Blue player on black square
-    init_pair(5, COLOR_BLACK, COLOR_CYAN); //Text colour
+	init_pair(RED_ON_WHITE, COLOR_RED, COLOR_WHITE); //Red player on white square
+    init_pair(RED_ON_BLACK, COLOR_RED, COLOR_BLACK); //Red player on black square
+	init_pair(BLUE_ON_WHITE, COLOR_BLUE, COLOR_WHITE); //Blue player on white square
+    init_pair(BLUE_ON_BLACK, COLOR_BLUE, COLOR_BLACK); //Blue player on black square
+    init_pair(TEXT_COLOUR, COLOR_BLACK, COLOR_CYAN); //Text colour
     cbreak();
     noecho();
     keypad(stdscr, TRUE);
@@ -58,7 +58,7 @@ void chessUI::enterPressed(ChessBoard &cBoard) {
 	if(!selected) {
 		if (currentLoc.h >= 0 && currentLoc.h < cBoard.board.size() &&
             currentLoc.w >= 0 && currentLoc.w < cBoard.board[0].size()) {
-			if(!(cBoard.board[currentLoc.h][currentLoc.w]->isEmpty)) {
+			if(!(cBoard.board[currentLoc.h][currentLoc.w]->isEmpty) && ((playerTurn && cBoard.board[currentLoc.h][currentLoc.w]->pieceColour == BLUE) || (!playerTurn && cBoard.board[currentLoc.h][currentLoc.w]->pieceColour == RED))) {
 				selectedLoc = currentLoc;
 				selected = true;
 			}
@@ -69,6 +69,9 @@ void chessUI::enterPressed(ChessBoard &cBoard) {
 		if (currentLoc.h >= 0 && currentLoc.h < cBoard.board.size() &&
             currentLoc.w >= 0 && currentLoc.w < cBoard.board[0].size()) {
 				ret = cBoard.board[selectedLoc.h][selectedLoc.w]->move(currentLoc, selectedLoc, cBoard.board);
+				if(ret > 0) {
+					playerTurn = !playerTurn;
+				}
 				selected = false;
 			}
 		else ret = -100;

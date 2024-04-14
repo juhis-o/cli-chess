@@ -1,7 +1,6 @@
 #include "chess.h"
 
 int chessPiece::moveEmptySpace(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vector<std::unique_ptr<chessPiece>>>& board){
-	
 	bool temp[2] = {board[oldLoc.h][oldLoc.w]->bgColour,board[newLoc.h][newLoc.w]->bgColour};
 	board[newLoc.h][newLoc.w].swap(board[oldLoc.h][oldLoc.w]);
 	board[oldLoc.h][oldLoc.w]->bgColour = temp[0];
@@ -11,7 +10,6 @@ int chessPiece::moveEmptySpace(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector
 }
 
 int chessPiece::moveOccupiedSpace(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vector<std::unique_ptr<chessPiece>>>& board){
-
 	bool temp[2] = {board[oldLoc.h][oldLoc.w]->bgColour,board[newLoc.h][newLoc.w]->bgColour};
 	board[newLoc.h][newLoc.w].swap(board[oldLoc.h][oldLoc.w]);
 	board[newLoc.h][newLoc.w]->bgColour = temp[1];
@@ -24,7 +22,6 @@ int chessPiece::moveOccupiedSpace(CursorLoc &newLoc, CursorLoc &oldLoc, std::vec
 }
 
 bool chessPiece::calcPath(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vector<std::unique_ptr<chessPiece>>>& board){
-
 	int deltaY = newLoc.h - oldLoc.h;
     int deltaX = newLoc.w - oldLoc.w;
     int stepY = (deltaY > 0) ? 1 : (deltaY < 0) ? -1 : 0;
@@ -39,11 +36,12 @@ bool chessPiece::calcPath(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std:
 }
 
 int pawnPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vector<std::unique_ptr<chessPiece>>>& board){
-	
 	int movementY = newLoc.h - oldLoc.h;
 	int movementX = newLoc.w - oldLoc.w;
 	int ret = 0;
 	bool direction = (pieceColour == BLUE) ? false : true;
+
+	if((newLoc.h == oldLoc.h) && (newLoc.w == oldLoc.w)) return -6;
 
 	if (((direction && movementY > 0) || (!direction && movementY < 0)) && (movementX == 0)) {
 		if(firstMove){
@@ -74,11 +72,12 @@ int pawnPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vecto
 }
 
 int towerPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vector<std::unique_ptr<chessPiece>>>& board){
-
 	int movementY = newLoc.h - oldLoc.h;
 	int movementX = newLoc.w - oldLoc.w;
 	bool colour = (pieceColour == BLUE) ? false : true;
 	int ret = 2;
+
+	if((newLoc.h == oldLoc.h) && (newLoc.w == oldLoc.w)) return -6;
 
 	if((newLoc.h == oldLoc.h) || (newLoc.w == oldLoc.w)){
 		if(calcPath(newLoc,oldLoc,board)) {
@@ -101,11 +100,12 @@ int towerPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vect
 }
 
 int bishopPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vector<std::unique_ptr<chessPiece>>>& board){
-
 	int movementY = newLoc.h - oldLoc.h;
 	int movementX = newLoc.w - oldLoc.w;
 	bool colour = (pieceColour == BLUE) ? false : true;
 	int ret = 3;
+
+	if((newLoc.h == oldLoc.h) && (newLoc.w == oldLoc.w)) return -6;
 
 	if(abs(movementX) == abs(movementY)) {
 		if(calcPath(newLoc,oldLoc,board)) {
@@ -128,11 +128,12 @@ int bishopPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vec
 }
 
 int horsePiece::move(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vector<std::unique_ptr<chessPiece>>>& board){
-
 	int movementY = newLoc.h - oldLoc.h;
 	int movementX = newLoc.w - oldLoc.w;
 	bool colour = (pieceColour == BLUE) ? false : true;
 	int ret = 1;
+
+	if((newLoc.h == oldLoc.h) && (newLoc.w == oldLoc.w)) return -6;
 
 	if((abs(movementX) + abs(movementY) == 3) && (abs(movementX) != abs(movementY))){
 		if(board[newLoc.h][newLoc.w]->isEmpty){
@@ -151,11 +152,12 @@ int horsePiece::move(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vect
 }
 
 int queenPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vector<std::unique_ptr<chessPiece>>>& board){
-
 	int movementY = newLoc.h - oldLoc.h;
 	int movementX = newLoc.w - oldLoc.w;
 	bool colour = (pieceColour == BLUE) ? false : true;
 	int ret = 4;
+
+	if((newLoc.h == oldLoc.h) && (newLoc.w == oldLoc.w)) return -6;
 
 	if((abs(movementX) == abs(movementY)) || ((newLoc.h == oldLoc.h) || (newLoc.w == oldLoc.w))) {
 		if(calcPath(newLoc,oldLoc,board)) {
@@ -179,11 +181,12 @@ int queenPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vect
 }
 
 int kingPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vector<std::unique_ptr<chessPiece>>>& board){
-
 	int movementY = newLoc.h - oldLoc.h;
 	int movementX = newLoc.w - oldLoc.w;
 	bool colour = (pieceColour == BLUE) ? false : true;
 	int ret = 5;
+
+	if((newLoc.h == oldLoc.h) && (newLoc.w == oldLoc.w)) return -6;
 
 	if(abs(movementX) == 1 || abs(movementY) == 1) {
 		if(board[newLoc.h][newLoc.w]->isEmpty){
@@ -223,7 +226,6 @@ ChessBoard::ChessBoard() {
 }
 
 void ChessBoard::FillRow(int row, bool& bgColour, int& unit_colour, std::vector<std::unique_ptr<chessPiece>>&Board) {
-
 	switch(row) {
 		case BACKROW:
 			for (int i = 0; i < 8; i++) {

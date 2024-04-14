@@ -4,6 +4,10 @@
 #ifndef KIROUS_H
 #define KIROUS_H
 
+#define RED_ON_WHITE 1
+#define RED_ON_BLACK 2
+#define BLUE_ON_WHITE 3
+#define BLUE_ON_BLACK 4
 #define TEXT_COLOUR 5
 
 struct CursorLoc {
