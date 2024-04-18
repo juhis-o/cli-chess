@@ -20,18 +20,9 @@ class chessPiece {
     public:
         virtual int move(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vector<std::unique_ptr<chessPiece>>>& board) = 0;
         char chessChar = ' '; //Chess piece
-        bool bgColour; //Chessboard Cellcolour
         int pieceColour; //Player colour
         bool isEmpty;
         virtual ~chessPiece() = default;
-};
-
-class emptySquare : public chessPiece {
-    public:
-        emptySquare() {
-            isEmpty = true;
-        }
-        int move(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vector<std::unique_ptr<chessPiece>>>& board) override {return 0;};
 };
 
 class pawnPiece : public chessPiece {
@@ -92,7 +83,7 @@ class kingPiece : public chessPiece {
 class ChessBoard {
     private:
         int turnCount = 0;
-        void FillRow(int row, bool& bgColour, int& unit_colour, std::vector<std::unique_ptr<chessPiece>>&Board);
+        void FillRow(int row, int& unit_colour, std::vector<std::unique_ptr<chessPiece>>&Board);
     public:
         ChessBoard();
         std::vector<std::vector<std::unique_ptr<chessPiece>>> board;

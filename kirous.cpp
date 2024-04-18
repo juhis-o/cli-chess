@@ -15,11 +15,20 @@ chessUI::chessUI() {
 
 void chessUI::updateInterface(ChessBoard &cBoard) {
 	clear();
+	bool bg = 1;
 	for (int i = 0; i < 8 ; i++){
 		for (int j = 0; j < 8; j++){
-			attron(COLOR_PAIR(cBoard.board[i][j]->bgColour+cBoard.board[i][j]->pieceColour));
-			addch(cBoard.board[i][j]->chessChar);
+			if(cBoard.board[i][j] != nullptr){
+				attron(COLOR_PAIR(bg+cBoard.board[i][j]->pieceColour));
+				addch(cBoard.board[i][j]->chessChar);
+			}
+			else {
+				attron(COLOR_PAIR(1+bg));
+				addch(' ');
+			}
+			bg = !bg;
 		}
+		bg = !bg;
 		addch('\n');
 	}
 	//move(8, 0);
@@ -58,7 +67,7 @@ void chessUI::enterPressed(ChessBoard &cBoard) {
 	if(!selected) {
 		if (currentLoc.h >= 0 && currentLoc.h < cBoard.board.size() &&
             currentLoc.w >= 0 && currentLoc.w < cBoard.board[0].size()) {
-			if(!(cBoard.board[currentLoc.h][currentLoc.w]->isEmpty) && ((playerTurn && cBoard.board[currentLoc.h][currentLoc.w]->pieceColour == BLUE) || (!playerTurn && cBoard.board[currentLoc.h][currentLoc.w]->pieceColour == RED))) {
+			if(!(cBoard.board[currentLoc.h][currentLoc.w] == nullptr) && ((playerTurn && cBoard.board[currentLoc.h][currentLoc.w]->pieceColour == BLUE) || (!playerTurn && cBoard.board[currentLoc.h][currentLoc.w]->pieceColour == RED))) {
 				selectedLoc = currentLoc;
 				selected = true;
 			}

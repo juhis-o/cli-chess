@@ -1,24 +1,14 @@
 #include "chess.h"
 
 int chessPiece::moveEmptySpace(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vector<std::unique_ptr<chessPiece>>>& board){
-	bool temp[2] = {board[oldLoc.h][oldLoc.w]->bgColour,board[newLoc.h][newLoc.w]->bgColour};
 	board[newLoc.h][newLoc.w].swap(board[oldLoc.h][oldLoc.w]);
-	board[oldLoc.h][oldLoc.w]->bgColour = temp[0];
-	board[newLoc.h][newLoc.w]->bgColour = temp[1];
-
 	return 10;
 }
 
 int chessPiece::moveOccupiedSpace(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vector<std::unique_ptr<chessPiece>>>& board){
-	bool temp[2] = {board[oldLoc.h][oldLoc.w]->bgColour,board[newLoc.h][newLoc.w]->bgColour};
 	board[newLoc.h][newLoc.w].swap(board[oldLoc.h][oldLoc.w]);
-	board[newLoc.h][newLoc.w]->bgColour = temp[1];
-	board[oldLoc.h].erase(board[oldLoc.h].begin() + oldLoc.w);
-	board[oldLoc.h].insert(board[oldLoc.h].begin() + oldLoc.w, std::make_unique<emptySquare>());
-	board[oldLoc.h][oldLoc.w]->bgColour = temp[0];
-	board[oldLoc.h][oldLoc.w]->pieceColour = 1;
-
-	return 10;
+	board[oldLoc.h][oldLoc.w] = nullptr;
+	return 11;
 }
 
 bool chessPiece::calcPath(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vector<std::unique_ptr<chessPiece>>>& board){
@@ -28,7 +18,7 @@ bool chessPiece::calcPath(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std:
     int stepX = (deltaX > 0) ? 1 : (deltaX < 0) ? -1 : 0;
 
     for (int h = oldLoc.h + stepY, w = oldLoc.w + stepX; h != newLoc.h || w != newLoc.w; h += stepY, w += stepX) {
-        if (!board[h][w]->isEmpty) {
+        if (board[h][w] != nullptr) {
             return false;
         }
     }
@@ -52,14 +42,14 @@ int pawnPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vecto
 			else ret = -1;
 		}
 		else {
-			if(abs(movementY) == 1 && (board[newLoc.h][newLoc.w]->isEmpty)) {
+			if(abs(movementY) == 1 && (board[newLoc.h][newLoc.w] == nullptr)) {
 				ret = moveEmptySpace(newLoc, oldLoc, board);
 			}
 			else ret = -1;
 		}
 	}
 	else if (((direction && movementY > 0) || (!direction && movementY < 0)) &&
-	(abs(movementX) == 1 && abs(movementY) == 1) && !(board[newLoc.h][newLoc.w]->isEmpty)){
+	(abs(movementX) == 1 && abs(movementY) == 1) && (board[newLoc.h][newLoc.w] != nullptr)){
         if ((direction && board[newLoc.h][newLoc.w]->pieceColour == BLUE) ||
             (!direction && board[newLoc.h][newLoc.w]->pieceColour == RED)) {
 				ret = moveOccupiedSpace(newLoc, oldLoc, board);
@@ -81,7 +71,7 @@ int towerPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vect
 
 	if((newLoc.h == oldLoc.h) || (newLoc.w == oldLoc.w)){
 		if(calcPath(newLoc,oldLoc,board)) {
-			if(board[newLoc.h][newLoc.w]->isEmpty){
+			if(board[newLoc.h][newLoc.w] == nullptr){
 				ret = moveEmptySpace(newLoc, oldLoc, board);
 			}
 			else {
@@ -109,7 +99,7 @@ int bishopPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vec
 
 	if(abs(movementX) == abs(movementY)) {
 		if(calcPath(newLoc,oldLoc,board)) {
-			if(board[newLoc.h][newLoc.w]->isEmpty){
+			if(board[newLoc.h][newLoc.w] == nullptr){
 				ret = moveEmptySpace(newLoc, oldLoc, board);
 			}
 			else {
@@ -135,8 +125,8 @@ int horsePiece::move(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vect
 
 	if((newLoc.h == oldLoc.h) && (newLoc.w == oldLoc.w)) return -6;
 
-	if((abs(movementX) + abs(movementY) == 3) && (abs(movementX) != abs(movementY))){
-		if(board[newLoc.h][newLoc.w]->isEmpty){
+	if((abs(movementX) == 1 && abs(movementY) == 2) || (abs(movementX) == 2 && abs(movementY) == 1)){
+		if(board[newLoc.h][newLoc.w] == nullptr){
 			ret = moveEmptySpace(newLoc, oldLoc, board);
 		}
 		else {
@@ -147,6 +137,7 @@ int horsePiece::move(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vect
 			else ret = -3;
 		}
 	}
+	else ret = -1;
 
 	return ret;
 }
@@ -161,7 +152,7 @@ int queenPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vect
 
 	if((abs(movementX) == abs(movementY)) || ((newLoc.h == oldLoc.h) || (newLoc.w == oldLoc.w))) {
 		if(calcPath(newLoc,oldLoc,board)) {
-			if(board[newLoc.h][newLoc.w]->isEmpty){
+			if(board[newLoc.h][newLoc.w] == nullptr){
 				ret = moveEmptySpace(newLoc, oldLoc, board);
 			}
 			else {
@@ -189,7 +180,7 @@ int kingPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vecto
 	if((newLoc.h == oldLoc.h) && (newLoc.w == oldLoc.w)) return -6;
 
 	if(abs(movementX) == 1 || abs(movementY) == 1) {
-		if(board[newLoc.h][newLoc.w]->isEmpty){
+		if(board[newLoc.h][newLoc.w] == nullptr){
 			ret = moveEmptySpace(newLoc, oldLoc, board);
 		}
 		else {
@@ -205,27 +196,26 @@ int kingPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vecto
 }
 
 ChessBoard::ChessBoard() {
-	bool background_colour = 1;
 	int unit_colour = 1;
 	board.resize(BOARD_SIZE);
     for (int i = 0; i < BOARD_SIZE; i++){
 		board[i].resize(BOARD_SIZE);
 		switch(i) {
 			case 0: case 7:
-				FillRow(BACKROW, background_colour,unit_colour, board[i]);
+				FillRow(BACKROW, unit_colour, board[i]);
 				break;
 			case 1: case 6:
-				FillRow(FRONTROW, background_colour,unit_colour, board[i]);
+				FillRow(FRONTROW, unit_colour, board[i]);
 				break;
 			default:
-				FillRow(EMPTYROW, background_colour,unit_colour, board[i]);
+				FillRow(EMPTYROW,unit_colour, board[i]);
 				break;
 		}
 		if(i == 1) unit_colour+=2;
 	    }
 }
 
-void ChessBoard::FillRow(int row, bool& bgColour, int& unit_colour, std::vector<std::unique_ptr<chessPiece>>&Board) {
+void ChessBoard::FillRow(int row, int& unit_colour, std::vector<std::unique_ptr<chessPiece>>&Board) {
 	switch(row) {
 		case BACKROW:
 			for (int i = 0; i < 8; i++) {
@@ -240,29 +230,19 @@ void ChessBoard::FillRow(int row, bool& bgColour, int& unit_colour, std::vector<
     			} else {
         			Board[i] = std::make_unique<kingPiece>();
     			}
-				bgColour = !bgColour;
-				Board[i]->bgColour = bgColour;
 				Board[i]->pieceColour = unit_colour;
 			}
-			bgColour = !bgColour;
 			break;
 		case FRONTROW:
 			for(int i = 0; i < 8; i++){
 				Board[i] = std::make_unique<pawnPiece>();
-				bgColour = !bgColour;
-				Board[i]->bgColour = bgColour;
 				Board[i]->pieceColour = unit_colour;
 			}
-    		bgColour = !bgColour;
 			break;
 		default:
 			for(int i = 0; i < 8; i++){
-				Board[i] = std::make_unique<emptySquare>();
-				bgColour = !bgColour;
-				Board[i]->bgColour = bgColour;
-				Board[i]->pieceColour = unit_colour;
+				Board[i] = nullptr;
 			}
-    		bgColour = !bgColour;
 			break;
 	}
 }
