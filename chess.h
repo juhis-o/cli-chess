@@ -14,79 +14,78 @@
 
 class chessPiece {
     protected:
-        int moveEmptySpace(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vector<std::unique_ptr<chessPiece>>>& board);
-        int moveOccupiedSpace(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vector<std::unique_ptr<chessPiece>>>& board);
-        bool calcPath(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vector<std::unique_ptr<chessPiece>>>& board);
+        std::vector<std::vector<std::unique_ptr<chessPiece>>>& board;
+        int moveEmptySpace(CursorLoc &newLoc, CursorLoc &oldLoc);
+        int moveOccupiedSpace(CursorLoc &newLoc, CursorLoc &oldLoc);
+        bool calcPath(CursorLoc &newLoc, CursorLoc &oldLoc);
     public:
-        virtual int move(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vector<std::unique_ptr<chessPiece>>>& board) = 0;
+        chessPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef) : board(boardRef) {}
+        virtual int move(CursorLoc &newLoc, CursorLoc &oldLoc) = 0;
         char chessChar = ' '; //Chess piece
         int pieceColour; //Player colour
-        bool isEmpty;
         virtual ~chessPiece() = default;
 };
 
 class pawnPiece : public chessPiece {
     public: 
-        pawnPiece() {
+        pawnPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef) : chessPiece(boardRef) {
             chessChar = 'S';
-            isEmpty = false;
         };
-        int move(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vector<std::unique_ptr<chessPiece>>>& board) override;
+        int move(CursorLoc &newLoc, CursorLoc &oldLoc) override;
         bool firstMove = true;
 };
 
 class towerPiece : public chessPiece {
     public: 
-        towerPiece() {
+        towerPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef) : chessPiece(boardRef) {
             chessChar = 'T';
-            isEmpty = false;
         };
-        int move(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vector<std::unique_ptr<chessPiece>>>& board) override;
+        int move(CursorLoc &newLoc, CursorLoc &oldLoc) override;
 };
 
 class bishopPiece : public chessPiece {
     public: 
-        bishopPiece() {
+        bishopPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef) : chessPiece(boardRef) {
             chessChar = 'B';
-            isEmpty = false;
         };
-        int move(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vector<std::unique_ptr<chessPiece>>>& board) override;
+        int move(CursorLoc &newLoc, CursorLoc &oldLoc) override;
 };
 
 class queenPiece : public chessPiece {
     public: 
-        queenPiece() {
+        queenPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef) : chessPiece(boardRef) {
             chessChar = 'Q';
-            isEmpty = false;
         };
-        int move(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vector<std::unique_ptr<chessPiece>>>& board) override;
+        int move(CursorLoc &newLoc, CursorLoc &oldLoc) override;
 };
 
 class horsePiece : public chessPiece {
     public: 
-        horsePiece() {
+        horsePiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef) : chessPiece(boardRef) {
             chessChar = 'H';
-            isEmpty = false;
         };
-        int move(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vector<std::unique_ptr<chessPiece>>>& board) override;
+        int move(CursorLoc &newLoc, CursorLoc &oldLoc) override;
 };
 
 class kingPiece : public chessPiece {
     public: 
-        kingPiece() {
+        kingPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& board) : chessPiece(board) {
             chessChar = 'K';
-            isEmpty = false;
         };
-        int move(CursorLoc &newLoc, CursorLoc &oldLoc, std::vector<std::vector<std::unique_ptr<chessPiece>>>& board) override;
+        int move(CursorLoc &newLoc, CursorLoc &oldLoc) override;
 };
 
 class ChessBoard {
     private:
         int turnCount = 0;
         void FillRow(int row, int& unit_colour, std::vector<std::unique_ptr<chessPiece>>&Board);
+        std::vector<std::vector<std::unique_ptr<chessPiece>>> board;
     public:
         ChessBoard();
-        std::vector<std::vector<std::unique_ptr<chessPiece>>> board;
+        int getPieceColour(int iter1, int iter2){return board[iter1][iter2]->pieceColour;};
+        int getPieceChar(int iter1, int iter2){return board[iter1][iter2]->chessChar;};
+        bool isNull(int iter1, int iter2){return (board[iter1][iter2] == nullptr) ? true : false;};
+        int movePiece(int iter1, int iter2,CursorLoc &newLoc, CursorLoc &oldLoc){return board[iter1][iter2]->move(newLoc,oldLoc);};
 };
 
 #endif

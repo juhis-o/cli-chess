@@ -18,12 +18,12 @@ void chessUI::updateInterface(ChessBoard &cBoard) {
 	bool bg = 1;
 	for (int i = 0; i < 8 ; i++){
 		for (int j = 0; j < 8; j++){
-			if(cBoard.board[i][j] != nullptr){
-				attron(COLOR_PAIR(bg+cBoard.board[i][j]->pieceColour));
-				addch(cBoard.board[i][j]->chessChar);
+			if(!cBoard.isNull(i,j)){
+				attron(COLOR_PAIR(bg+cBoard.getPieceColour(i,j)));
+				addch(cBoard.getPieceChar(i,j));
 			}
 			else {
-				attron(COLOR_PAIR(1+bg));
+				attron(COLOR_PAIR(bg+RED_ON_WHITE)); //Switches between black and white squares with bg bool
 				addch(' ');
 			}
 			bg = !bg;
@@ -65,9 +65,9 @@ void chessUI::freeSelect(ChessBoard &cBoard){
 
 void chessUI::enterPressed(ChessBoard &cBoard) {
 	if(!selected) {
-		if (currentLoc.h >= 0 && currentLoc.h < cBoard.board.size() &&
-            currentLoc.w >= 0 && currentLoc.w < cBoard.board[0].size()) {
-			if(!(cBoard.board[currentLoc.h][currentLoc.w] == nullptr) && ((playerTurn && cBoard.board[currentLoc.h][currentLoc.w]->pieceColour == BLUE) || (!playerTurn && cBoard.board[currentLoc.h][currentLoc.w]->pieceColour == RED))) {
+		if (currentLoc.h >= 0 && currentLoc.h < 8 &&
+            currentLoc.w >= 0 && currentLoc.w < 8) {
+			if(!(cBoard.isNull(currentLoc.h,currentLoc.w)) && ((playerTurn && cBoard.getPieceColour(currentLoc.h,currentLoc.w) == BLUE) || (!playerTurn && cBoard.getPieceColour(currentLoc.h,currentLoc.w) == RED))) {
 				selectedLoc = currentLoc;
 				selected = true;
 			}
@@ -75,9 +75,9 @@ void chessUI::enterPressed(ChessBoard &cBoard) {
 		else ret = -100;
 	}
 	else {
-		if (currentLoc.h >= 0 && currentLoc.h < cBoard.board.size() &&
-            currentLoc.w >= 0 && currentLoc.w < cBoard.board[0].size()) {
-				ret = cBoard.board[selectedLoc.h][selectedLoc.w]->move(currentLoc, selectedLoc, cBoard.board);
+		if (currentLoc.h >= 0 && currentLoc.h < 8 &&
+            currentLoc.w >= 0 && currentLoc.w < 8) {
+				ret = cBoard.movePiece(selectedLoc.h,selectedLoc.w,currentLoc,selectedLoc);
 				if(ret > 0) {
 					playerTurn = !playerTurn;
 				}
