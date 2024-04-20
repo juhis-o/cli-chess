@@ -1,14 +1,12 @@
 #include "chess.h"
 
-int chessPiece::moveEmptySpace(CursorLoc &newLoc, CursorLoc &oldLoc){
+void chessPiece::moveEmptySpace(CursorLoc &newLoc, CursorLoc &oldLoc){
 	board[newLoc.h][newLoc.w].swap(board[oldLoc.h][oldLoc.w]);
-	return 10;
 }
 
-int chessPiece::moveOccupiedSpace(CursorLoc &newLoc, CursorLoc &oldLoc){
+void chessPiece::moveOccupiedSpace(CursorLoc &newLoc, CursorLoc &oldLoc){
 	board[newLoc.h][newLoc.w].swap(board[oldLoc.h][oldLoc.w]);
 	board[oldLoc.h][oldLoc.w] = nullptr;
-	return 11;
 }
 
 bool chessPiece::calcPath(CursorLoc &newLoc, CursorLoc &oldLoc){
@@ -28,35 +26,35 @@ bool chessPiece::calcPath(CursorLoc &newLoc, CursorLoc &oldLoc){
 int pawnPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 	int movementY = newLoc.h - oldLoc.h;
 	int movementX = newLoc.w - oldLoc.w;
-	int ret = 0;
+	int ret = MOVE_OK;
 	bool direction = (pieceColour == BLUE) ? false : true;
 
-	if((newLoc.h == oldLoc.h) && (newLoc.w == oldLoc.w)) return -6;
+	if((newLoc.h == oldLoc.h) && (newLoc.w == oldLoc.w)) return -MOVE_CANCEL;
 
 	if (((direction && movementY > 0) || (!direction && movementY < 0)) && (movementX == 0)) {
 		if(firstMove){
 			if(abs(movementY) <= 2 && (calcPath(newLoc,oldLoc))) {
 				firstMove = false;
-				ret = moveEmptySpace(newLoc, oldLoc);
+				moveEmptySpace(newLoc, oldLoc);
 			}
-			else ret = -1;
+			else ret = -MOVE_NOT_VALID;
 		}
 		else {
 			if(abs(movementY) == 1 && (board[newLoc.h][newLoc.w] == nullptr)) {
-				ret = moveEmptySpace(newLoc, oldLoc);
+				moveEmptySpace(newLoc, oldLoc);
 			}
-			else ret = -1;
+			else ret = -MOVE_NOT_VALID;
 		}
 	}
 	else if (((direction && movementY > 0) || (!direction && movementY < 0)) &&
 	(abs(movementX) == 1 && abs(movementY) == 1) && (board[newLoc.h][newLoc.w] != nullptr)){
         if ((direction && board[newLoc.h][newLoc.w]->pieceColour == BLUE) ||
             (!direction && board[newLoc.h][newLoc.w]->pieceColour == RED)) {
-				ret = moveOccupiedSpace(newLoc, oldLoc);
-				}
-		else ret = -10;
+				moveOccupiedSpace(newLoc, oldLoc);
+			}
+		else ret = -MOVE_NOT_VALID;
 	}
-	else ret = -1;
+	else ret = -MOVE_NOT_VALID;
 
 	return ret;
 }
@@ -65,26 +63,26 @@ int towerPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 	int movementY = newLoc.h - oldLoc.h;
 	int movementX = newLoc.w - oldLoc.w;
 	bool colour = (pieceColour == BLUE) ? false : true;
-	int ret = 2;
+	int ret = MOVE_OK;
 
-	if((newLoc.h == oldLoc.h) && (newLoc.w == oldLoc.w)) return -6;
+	if((newLoc.h == oldLoc.h) && (newLoc.w == oldLoc.w)) return -MOVE_CANCEL;
 
 	if((newLoc.h == oldLoc.h) || (newLoc.w == oldLoc.w)){
 		if(calcPath(newLoc,oldLoc)) {
 			if(board[newLoc.h][newLoc.w] == nullptr){
-				ret = moveEmptySpace(newLoc, oldLoc);
+				moveEmptySpace(newLoc, oldLoc);
 			}
 			else {
             	if ((colour && board[newLoc.h][newLoc.w]->pieceColour == BLUE) ||
                 (!colour && board[newLoc.h][newLoc.w]->pieceColour == RED)) {
-				ret = moveOccupiedSpace(newLoc, oldLoc);
+				moveOccupiedSpace(newLoc, oldLoc);
 				}
-				else ret = -3;
+				else ret = -CAPTURING_OWN_PIECE;
 			}
 		}
-		else ret = -2;
+		else ret = -PIECE_ON_PATH;
 	}
-	else ret = -1;
+	else ret = -MOVE_NOT_VALID;
 
 	return ret;
 }
@@ -93,26 +91,26 @@ int bishopPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 	int movementY = newLoc.h - oldLoc.h;
 	int movementX = newLoc.w - oldLoc.w;
 	bool colour = (pieceColour == BLUE) ? false : true;
-	int ret = 3;
+	int ret = MOVE_OK;
 
-	if((newLoc.h == oldLoc.h) && (newLoc.w == oldLoc.w)) return -6;
+	if((newLoc.h == oldLoc.h) && (newLoc.w == oldLoc.w)) return -MOVE_CANCEL;
 
 	if(abs(movementX) == abs(movementY)) {
 		if(calcPath(newLoc,oldLoc)) {
 			if(board[newLoc.h][newLoc.w] == nullptr){
-				ret = moveEmptySpace(newLoc, oldLoc);
+				moveEmptySpace(newLoc, oldLoc);
 			}
 			else {
             	if ((colour && board[newLoc.h][newLoc.w]->pieceColour == BLUE) ||
                 (!colour && board[newLoc.h][newLoc.w]->pieceColour == RED)) {
-				ret = moveOccupiedSpace(newLoc, oldLoc);
+				moveOccupiedSpace(newLoc, oldLoc);
 				}
-				else ret = -3;
+				else ret = -CAPTURING_OWN_PIECE;
 			}
 		}
-		else ret = -2;
+		else ret = -PIECE_ON_PATH;
 	}
-	else ret = -1;
+	else ret = -MOVE_NOT_VALID;
 
 	return ret;
 }
@@ -121,23 +119,23 @@ int horsePiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 	int movementY = newLoc.h - oldLoc.h;
 	int movementX = newLoc.w - oldLoc.w;
 	bool colour = (pieceColour == BLUE) ? false : true;
-	int ret = 1;
+	int ret = MOVE_OK;
 
-	if((newLoc.h == oldLoc.h) && (newLoc.w == oldLoc.w)) return -6;
+	if((newLoc.h == oldLoc.h) && (newLoc.w == oldLoc.w)) return -MOVE_CANCEL;
 
 	if((abs(movementX) == 1 && abs(movementY) == 2) || (abs(movementX) == 2 && abs(movementY) == 1)){
 		if(board[newLoc.h][newLoc.w] == nullptr){
-			ret = moveEmptySpace(newLoc, oldLoc);
+			moveEmptySpace(newLoc, oldLoc);
 		}
 		else {
             if ((colour && board[newLoc.h][newLoc.w]->pieceColour == BLUE) ||
                 (!colour && board[newLoc.h][newLoc.w]->pieceColour == RED)) {
-				ret = moveOccupiedSpace(newLoc, oldLoc);
+				moveOccupiedSpace(newLoc, oldLoc);
 				}
-			else ret = -3;
+			else ret = -CAPTURING_OWN_PIECE;
 		}
 	}
-	else ret = -1;
+	else ret = -MOVE_NOT_VALID;
 
 	return ret;
 }
@@ -146,26 +144,26 @@ int queenPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 	int movementY = newLoc.h - oldLoc.h;
 	int movementX = newLoc.w - oldLoc.w;
 	bool colour = (pieceColour == BLUE) ? false : true;
-	int ret = 4;
+	int ret = MOVE_OK;
 
-	if((newLoc.h == oldLoc.h) && (newLoc.w == oldLoc.w)) return -6;
+	if((newLoc.h == oldLoc.h) && (newLoc.w == oldLoc.w)) return -MOVE_CANCEL;
 
 	if((abs(movementX) == abs(movementY)) || ((newLoc.h == oldLoc.h) || (newLoc.w == oldLoc.w))) {
 		if(calcPath(newLoc,oldLoc)) {
 			if(board[newLoc.h][newLoc.w] == nullptr){
-				ret = moveEmptySpace(newLoc, oldLoc);
+				moveEmptySpace(newLoc, oldLoc);
 			}
 			else {
             	if ((colour && board[newLoc.h][newLoc.w]->pieceColour == BLUE) ||
                 (!colour && board[newLoc.h][newLoc.w]->pieceColour == RED)) {
-				ret = moveOccupiedSpace(newLoc, oldLoc);
+				moveOccupiedSpace(newLoc, oldLoc);
 				}
-				else ret = -3;
+				else ret = -CAPTURING_OWN_PIECE;
 			}
 		}
-		else ret = -2;
+		else ret = -PIECE_ON_PATH;
 	}
-	else ret = -1;
+	else ret = -MOVE_NOT_VALID;
 
 
 	return ret;
@@ -175,22 +173,23 @@ int kingPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 	int movementY = newLoc.h - oldLoc.h;
 	int movementX = newLoc.w - oldLoc.w;
 	bool colour = (pieceColour == BLUE) ? false : true;
-	int ret = 5;
+	int ret = MOVE_OK;
 
-	if((newLoc.h == oldLoc.h) && (newLoc.w == oldLoc.w)) return -6;
+	if((newLoc.h == oldLoc.h) && (newLoc.w == oldLoc.w)) return -MOVE_CANCEL;
 
 	if(abs(movementX) == 1 || abs(movementY) == 1) {
 		if(board[newLoc.h][newLoc.w] == nullptr){
-			ret = moveEmptySpace(newLoc, oldLoc);
+			moveEmptySpace(newLoc, oldLoc);
 		}
 		else {
             if ((colour && board[newLoc.h][newLoc.w]->pieceColour == BLUE) ||
                 (!colour && board[newLoc.h][newLoc.w]->pieceColour == RED)) {
-				ret = moveOccupiedSpace(newLoc, oldLoc);
+				moveOccupiedSpace(newLoc, oldLoc);
 			}
-			else ret = -3;
+			else ret = -CAPTURING_OWN_PIECE;
 		}
 	}
+	else ret = -MOVE_NOT_VALID;
 
 	return ret;
 }
@@ -214,11 +213,7 @@ ChessBoard::ChessBoard() {
 		if(i == 1) unit_colour+=2;
 	    }
 }
-/*
-int ChessBoard::getPiece(CursorLoc &loc) {
 
-}
-*/
 void ChessBoard::FillRow(int row, int& unit_colour, std::vector<std::unique_ptr<chessPiece>>&Board) {
 	switch(row) {
 		case BACKROW:

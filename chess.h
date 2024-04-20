@@ -12,12 +12,15 @@
 #define RED 1
 #define BLUE 3
 
+enum errList{MOVE_OK,MOVE_NOT_VALID,CAPTURING_OWN_PIECE,PIECE_ON_PATH,MOVE_CANCEL};
+
 class chessPiece {
     protected:
         std::vector<std::vector<std::unique_ptr<chessPiece>>>& board;
-        int moveEmptySpace(CursorLoc &newLoc, CursorLoc &oldLoc);
-        int moveOccupiedSpace(CursorLoc &newLoc, CursorLoc &oldLoc);
+        void moveEmptySpace(CursorLoc &newLoc, CursorLoc &oldLoc);
+        void moveOccupiedSpace(CursorLoc &newLoc, CursorLoc &oldLoc);
         bool calcPath(CursorLoc &newLoc, CursorLoc &oldLoc);
+//        errList retVal = MOVE_OK;
     public:
         chessPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef) : board(boardRef) {}
         virtual int move(CursorLoc &newLoc, CursorLoc &oldLoc) = 0;
@@ -69,7 +72,7 @@ class horsePiece : public chessPiece {
 
 class kingPiece : public chessPiece {
     public: 
-        kingPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& board) : chessPiece(board) {
+        kingPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef) : chessPiece(boardRef) {
             chessChar = 'K';
         };
         int move(CursorLoc &newLoc, CursorLoc &oldLoc) override;
@@ -85,7 +88,7 @@ class ChessBoard {
         int getPieceColour(int iter1, int iter2){return board[iter1][iter2]->pieceColour;};
         int getPieceChar(int iter1, int iter2){return board[iter1][iter2]->chessChar;};
         bool isNull(int iter1, int iter2){return (board[iter1][iter2] == nullptr) ? true : false;};
-        int movePiece(int iter1, int iter2,CursorLoc &newLoc, CursorLoc &oldLoc){return board[iter1][iter2]->move(newLoc,oldLoc);};
+        int movePiece(CursorLoc &newLoc, CursorLoc &oldLoc){return board[oldLoc.h][oldLoc.w]->move(newLoc,oldLoc);};
 };
 
 #endif

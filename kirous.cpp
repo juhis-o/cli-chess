@@ -23,7 +23,7 @@ void chessUI::updateInterface(ChessBoard &cBoard) {
 				addch(cBoard.getPieceChar(i,j));
 			}
 			else {
-				attron(COLOR_PAIR(bg+RED_ON_WHITE)); //Switches between black and white squares with bg bool
+				attron(COLOR_PAIR(bg+RED_ON_WHITE)); //Switches between black and white squares with bg
 				addch(' ');
 			}
 			bg = !bg;
@@ -31,7 +31,7 @@ void chessUI::updateInterface(ChessBoard &cBoard) {
 		bg = !bg;
 		addch('\n');
 	}
-	//move(8, 0);
+
 	attron(COLOR_PAIR(TEXT_COLOUR));
 	if(!Init){getyx(stdscr,currentLoc.h,currentLoc.w);Init = true;}
 	else {
@@ -65,8 +65,8 @@ void chessUI::freeSelect(ChessBoard &cBoard){
 
 void chessUI::enterPressed(ChessBoard &cBoard) {
 	if(!selected) {
-		if (currentLoc.h >= 0 && currentLoc.h < 8 &&
-            currentLoc.w >= 0 && currentLoc.w < 8) {
+		if (currentLoc.h >= 0 && currentLoc.h < BOARD_SIZE &&
+            currentLoc.w >= 0 && currentLoc.w < BOARD_SIZE) {
 			if(!(cBoard.isNull(currentLoc.h,currentLoc.w)) && ((playerTurn && cBoard.getPieceColour(currentLoc.h,currentLoc.w) == BLUE) || (!playerTurn && cBoard.getPieceColour(currentLoc.h,currentLoc.w) == RED))) {
 				selectedLoc = currentLoc;
 				selected = true;
@@ -75,10 +75,10 @@ void chessUI::enterPressed(ChessBoard &cBoard) {
 		else ret = -100;
 	}
 	else {
-		if (currentLoc.h >= 0 && currentLoc.h < 8 &&
-            currentLoc.w >= 0 && currentLoc.w < 8) {
-				ret = cBoard.movePiece(selectedLoc.h,selectedLoc.w,currentLoc,selectedLoc);
-				if(ret > 0) {
+		if (currentLoc.h >= 0 && currentLoc.h < BOARD_SIZE &&
+            currentLoc.w >= 0 && currentLoc.w < BOARD_SIZE) {
+				ret = cBoard.movePiece(currentLoc,selectedLoc);
+				if(ret == 0) {
 					playerTurn = !playerTurn;
 				}
 				selected = false;
