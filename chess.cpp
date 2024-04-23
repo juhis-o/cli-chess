@@ -6,7 +6,7 @@ void chessPiece::moveEmptySpace(CursorLoc &newLoc, CursorLoc &oldLoc){
 
 void chessPiece::moveOccupiedSpace(CursorLoc &newLoc, CursorLoc &oldLoc){
 	board[newLoc.h][newLoc.w].swap(board[oldLoc.h][oldLoc.w]);
-	board[oldLoc.h][oldLoc.w] = nullptr;
+	board[oldLoc.h][oldLoc.w] = std::make_unique<emptyPiece>(board);
 }
 
 bool chessPiece::calcPath(CursorLoc &newLoc, CursorLoc &oldLoc){
@@ -16,11 +16,28 @@ bool chessPiece::calcPath(CursorLoc &newLoc, CursorLoc &oldLoc){
     int stepX = (deltaX > 0) ? 1 : (deltaX < 0) ? -1 : 0;
 
     for (int h = oldLoc.h + stepY, w = oldLoc.w + stepX; h != newLoc.h || w != newLoc.w; h += stepY, w += stepX) {
-        if (board[h][w] != nullptr) {
+        if (board[h][w]->chessChar != ' ') {
             return false;
         }
     }
     return true;
+}
+
+void pawnPiece::checkSquares(int h, int w){
+	int dirH = (pieceColour == BLUE) ? -1 : 1;
+	bool colour = (pieceColour == BLUE) ? false : true;
+/*
+	if((h+dirH) >= 0 && (h+dirH) < BOARD_SIZE) {
+		if((w-1) >= 0) {
+			if((colour && board[h+dirH][w-1]->pieceColour == BLUE) || (!colour && board[h+dirH][w-1]->pieceColour == RED) || board[h+dirH][w-1]->chessChar == ' ')
+			board[h+dirH][w-1]->threat[colour] = true;
+		}
+		if((w+1) < BOARD_SIZE) {
+			if((colour && board[h+dirH][w+1]->pieceColour == BLUE) || (!colour && board[h+dirH][w+1]->pieceColour == RED) || board[h+dirH][w+1]->chessChar == ' ')
+			board[h+dirH][w+1]->threat[colour] = true;
+		}
+	}
+*/
 }
 
 int pawnPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
@@ -40,14 +57,14 @@ int pawnPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 			else ret = -MOVE_NOT_VALID;
 		}
 		else {
-			if(abs(movementY) == 1 && (board[newLoc.h][newLoc.w] == nullptr)) {
+			if(abs(movementY) == 1 && (board[newLoc.h][newLoc.w]->chessChar == ' ')) {
 				moveEmptySpace(newLoc, oldLoc);
 			}
 			else ret = -MOVE_NOT_VALID;
 		}
 	}
 	else if (((direction && movementY > 0) || (!direction && movementY < 0)) &&
-	(abs(movementX) == 1 && abs(movementY) == 1) && (board[newLoc.h][newLoc.w] != nullptr)){
+	(abs(movementX) == 1 && abs(movementY) == 1) && (board[newLoc.h][newLoc.w]->chessChar != ' ')){
         if ((direction && board[newLoc.h][newLoc.w]->pieceColour == BLUE) ||
             (!direction && board[newLoc.h][newLoc.w]->pieceColour == RED)) {
 				moveOccupiedSpace(newLoc, oldLoc);
@@ -57,6 +74,44 @@ int pawnPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 	else ret = -MOVE_NOT_VALID;
 
 	return ret;
+}
+
+void towerPiece::checkSquares(int h, int w){
+//	int dirH = (pieceColour == BLUE) ? -1 : 1;
+	bool colour = (pieceColour == BLUE) ? false : true;
+/*
+	for(int i = h +1; i < BOARD_SIZE; i++) {
+		if((!colour && board[i][w]->pieceColour == BLUE) ||
+		(colour && board[i][w]->pieceColour == RED)) break;
+		board[i][w]->threat[colour] = true;
+		if((!colour && board[i][w]->pieceColour == RED) ||
+		(colour && board[i][w]->pieceColour == BLUE)) break;
+	}
+
+	for(int i = h -1; i >= 0; i--) {
+		if((!colour && board[i][w]->pieceColour == BLUE) ||
+		(colour && board[i][w]->pieceColour == RED)) break;
+		board[i][w]->threat[colour] = true;
+		if((!colour && board[i][w]->pieceColour == RED) ||
+		(colour && board[i][w]->pieceColour == BLUE)) break;
+	}
+
+	for(int i = w +1; i < BOARD_SIZE; i++) {
+		if((!colour && board[h][i]->pieceColour == BLUE) ||
+		(colour && board[h][i]->pieceColour == RED)) break;
+		board[h][i]->threat[colour] = true;
+		if((!colour && board[h][i]->pieceColour == RED) ||
+		(colour && board[h][i]->pieceColour == BLUE)) break;
+	}
+
+	for(int i = w -1; i >= 0; i--) {
+		if((!colour && board[h][i]->pieceColour == BLUE) ||
+		(colour && board[h][i]->pieceColour == RED)) break;
+		board[h][i]->threat[colour] = true;
+		if((!colour && board[h][i]->pieceColour == RED) ||
+		(colour && board[h][i]->pieceColour == BLUE)) break;
+	}
+*/
 }
 
 int towerPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
@@ -69,7 +124,7 @@ int towerPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 
 	if((newLoc.h == oldLoc.h) || (newLoc.w == oldLoc.w)){
 		if(calcPath(newLoc,oldLoc)) {
-			if(board[newLoc.h][newLoc.w] == nullptr){
+			if(board[newLoc.h][newLoc.w]->chessChar == ' '){
 				moveEmptySpace(newLoc, oldLoc);
 			}
 			else {
@@ -85,6 +140,42 @@ int towerPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 	else ret = -MOVE_NOT_VALID;
 
 	return ret;
+}
+
+void bishopPiece::checkSquares(int h, int w){
+	bool colour = (pieceColour == BLUE) ? false : true;
+
+	for(int i = h +1, j = w +1; (i < BOARD_SIZE) && (j < BOARD_SIZE); i++,j++) {
+		if((!colour && board[i][j]->pieceColour == BLUE) ||
+		(colour && board[i][j]->pieceColour == RED)) break;
+		board[i][j]->threat[colour] = true;
+		if((!colour && board[i][j]->pieceColour == RED) ||
+		(colour && board[i][j]->pieceColour == BLUE)) break;
+	}
+
+	for(int i = h -1,j = w -1; (i >= 0) && (j >= 0); i--,j--) {
+		if((!colour && board[i][j]->pieceColour == BLUE) ||
+		(colour && board[i][j]->pieceColour == RED)) break;
+		board[i][j]->threat[colour] = true;
+		if((!colour && board[i][j]->pieceColour == RED) ||
+		(colour && board[i][j]->pieceColour == BLUE)) break;
+	}
+
+	for(int i = h +1, j = w -1; (i < BOARD_SIZE) && (j >= 0); i++,j--) {
+		if((!colour && board[i][j]->pieceColour == BLUE) ||
+		(colour && board[i][j]->pieceColour == RED)) break;
+		board[i][j]->threat[colour] = true;
+		if((!colour && board[i][j]->pieceColour == RED) ||
+		(colour && board[i][j]->pieceColour == BLUE)) break;
+	}
+
+	for(int i = h -1, j = w +1; (i >= 0) && (j < BOARD_SIZE); i--,j++) {
+		if((!colour && board[i][j]->pieceColour == BLUE) ||
+		(colour && board[i][j]->pieceColour == RED)) break;
+		board[i][j]->threat[colour] = true;
+		if((!colour && board[i][j]->pieceColour == RED) ||
+		(colour && board[i][j]->pieceColour == BLUE)) break;
+	}
 }
 
 int bishopPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
@@ -97,7 +188,7 @@ int bishopPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 
 	if(abs(movementX) == abs(movementY)) {
 		if(calcPath(newLoc,oldLoc)) {
-			if(board[newLoc.h][newLoc.w] == nullptr){
+			if(board[newLoc.h][newLoc.w]->chessChar == ' '){
 				moveEmptySpace(newLoc, oldLoc);
 			}
 			else {
@@ -115,6 +206,15 @@ int bishopPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 	return ret;
 }
 
+void horsePiece::checkSquares(int h, int w){
+	bool colour = (pieceColour == BLUE) ? false : true;
+	int horseMovement[2] = {1,2};
+
+	for(int i = 0; i < 4; i++) {
+		if(i);
+	}
+}
+
 int horsePiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 	int movementY = newLoc.h - oldLoc.h;
 	int movementX = newLoc.w - oldLoc.w;
@@ -124,7 +224,7 @@ int horsePiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 	if((newLoc.h == oldLoc.h) && (newLoc.w == oldLoc.w)) return -MOVE_CANCEL;
 
 	if((abs(movementX) == 1 && abs(movementY) == 2) || (abs(movementX) == 2 && abs(movementY) == 1)){
-		if(board[newLoc.h][newLoc.w] == nullptr){
+		if(board[newLoc.h][newLoc.w]->chessChar == ' '){
 			moveEmptySpace(newLoc, oldLoc);
 		}
 		else {
@@ -140,6 +240,11 @@ int horsePiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 	return ret;
 }
 
+void queenPiece::checkSquares(int h, int w){
+	int dirH = (pieceColour == BLUE) ? -1 : 1;
+	bool colour = (pieceColour == BLUE) ? false : true;
+}
+
 int queenPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 	int movementY = newLoc.h - oldLoc.h;
 	int movementX = newLoc.w - oldLoc.w;
@@ -150,7 +255,7 @@ int queenPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 
 	if((abs(movementX) == abs(movementY)) || ((newLoc.h == oldLoc.h) || (newLoc.w == oldLoc.w))) {
 		if(calcPath(newLoc,oldLoc)) {
-			if(board[newLoc.h][newLoc.w] == nullptr){
+			if(board[newLoc.h][newLoc.w]->chessChar == ' '){
 				moveEmptySpace(newLoc, oldLoc);
 			}
 			else {
@@ -169,6 +274,11 @@ int queenPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 	return ret;
 }
 
+void kingPiece::checkSquares(int h, int w){
+	int dirH = (pieceColour == BLUE) ? -1 : 1;
+	bool colour = (pieceColour == BLUE) ? false : true;
+}
+
 int kingPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 	int movementY = newLoc.h - oldLoc.h;
 	int movementX = newLoc.w - oldLoc.w;
@@ -178,7 +288,7 @@ int kingPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 	if((newLoc.h == oldLoc.h) && (newLoc.w == oldLoc.w)) return -MOVE_CANCEL;
 
 	if(abs(movementX) == 1 || abs(movementY) == 1) {
-		if(board[newLoc.h][newLoc.w] == nullptr){
+		if(board[newLoc.h][newLoc.w]->chessChar == ' '){
 			moveEmptySpace(newLoc, oldLoc);
 		}
 		else {
@@ -212,6 +322,12 @@ ChessBoard::ChessBoard() {
 		}
 		if(i == 1) unit_colour+=2;
 	    }
+	
+	for (int i = 0; i < BOARD_SIZE; i++){
+		for(int j = 0; j < BOARD_SIZE; j++){
+			if(board[i][j]->chessChar != ' ') board[i][j]->checkSquares(i,j);
+		}
+	}
 }
 
 void ChessBoard::FillRow(int row, int& unit_colour, std::vector<std::unique_ptr<chessPiece>>&Board) {
@@ -232,15 +348,17 @@ void ChessBoard::FillRow(int row, int& unit_colour, std::vector<std::unique_ptr<
 				Board[i]->pieceColour = unit_colour;
 			}
 			break;
+
 		case FRONTROW:
 			for(int i = 0; i < 8; i++){
 				Board[i] = std::make_unique<pawnPiece>(board);
 				Board[i]->pieceColour = unit_colour;
 			}
 			break;
+
 		default:
 			for(int i = 0; i < 8; i++){
-				Board[i] = nullptr;
+				Board[i] = std::make_unique<emptyPiece>(board);
 			}
 			break;
 	}
