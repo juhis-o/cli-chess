@@ -29,11 +29,15 @@ void pawnPiece::checkSquares(int h, int w){
 /*
 	if((h+dirH) >= 0 && (h+dirH) < BOARD_SIZE) {
 		if((w-1) >= 0) {
-			if((colour && board[h+dirH][w-1]->pieceColour == BLUE) || (!colour && board[h+dirH][w-1]->pieceColour == RED) || board[h+dirH][w-1]->chessChar == ' ')
+			if((colour && board[h+dirH][w-1]->pieceColour == BLUE) ||
+			(!colour && board[h+dirH][w-1]->pieceColour == RED) ||
+			 board[h+dirH][w-1]->chessChar == ' ')
 			board[h+dirH][w-1]->threat[colour] = true;
 		}
 		if((w+1) < BOARD_SIZE) {
-			if((colour && board[h+dirH][w+1]->pieceColour == BLUE) || (!colour && board[h+dirH][w+1]->pieceColour == RED) || board[h+dirH][w+1]->chessChar == ' ')
+			if((colour && board[h+dirH][w+1]->pieceColour == BLUE) ||
+			(!colour && board[h+dirH][w+1]->pieceColour == RED) ||
+			board[h+dirH][w+1]->chessChar == ' ')
 			board[h+dirH][w+1]->threat[colour] = true;
 		}
 	}
@@ -210,9 +214,9 @@ void horsePiece::checkSquares(int h, int w){
 	bool colour = (pieceColour == BLUE) ? false : true;
 	int horseMovement[2] = {1,2};
 
-	for(int i = 0; i < 4; i++) {
-		if(i);
-	}
+//	for(int i = 0; i < 4; i++) {
+//		if(i);
+//	}
 }
 
 int horsePiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
