@@ -28,7 +28,7 @@ class chessPiece {
 
 class emptyPiece : public chessPiece {
     public: 
-        emptyPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef) : chessPiece(boardRef){0;};
+        emptyPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef) : chessPiece(boardRef){};
         int move(CursorLoc &newLoc, CursorLoc &oldLoc) override {return 0;};
         void checkSquares(int h, int w) override {};
 };
@@ -99,7 +99,7 @@ class ChessBoard {
         ChessBoard();
         int getPieceColour(int iter1, int iter2){return board[iter1][iter2]->pieceColour;};
         int getPieceChar(int iter1, int iter2){return board[iter1][iter2]->chessChar;};
-        bool getSquareThreat(int iter1, int iter2){return board[iter1][iter2]->threat[0];};
+        bool getSquareThreat(int iter1, int iter2){return board[iter1][iter2]->threat[1];};
         int movePiece(CursorLoc &newLoc, CursorLoc &oldLoc){
             int a = board[oldLoc.h][oldLoc.w]->move(newLoc,oldLoc);
             for (int i = 0; i < BOARD_SIZE; i++){

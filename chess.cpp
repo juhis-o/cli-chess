@@ -26,7 +26,7 @@ bool chessPiece::calcPath(CursorLoc &newLoc, CursorLoc &oldLoc){
 void pawnPiece::checkSquares(int h, int w){
 	int dirH = (pieceColour == BLUE) ? -1 : 1;
 	bool colour = (pieceColour == BLUE) ? false : true;
-/*
+
 	if((h+dirH) >= 0 && (h+dirH) < BOARD_SIZE) {
 		if((w-1) >= 0) {
 			if((colour && board[h+dirH][w-1]->pieceColour == BLUE) ||
@@ -41,7 +41,7 @@ void pawnPiece::checkSquares(int h, int w){
 			board[h+dirH][w+1]->threat[colour] = true;
 		}
 	}
-*/
+
 }
 
 int pawnPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
@@ -81,46 +81,32 @@ int pawnPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 }
 
 void towerPiece::checkSquares(int h, int w){
-//	int dirH = (pieceColour == BLUE) ? -1 : 1;
 	bool colour = (pieceColour == BLUE) ? false : true;
-/*
-	for(int i = h +1; i < BOARD_SIZE; i++) {
-		if((!colour && board[i][w]->pieceColour == BLUE) ||
-		(colour && board[i][w]->pieceColour == RED)) break;
-		board[i][w]->threat[colour] = true;
-		if((!colour && board[i][w]->pieceColour == RED) ||
-		(colour && board[i][w]->pieceColour == BLUE)) break;
+	for(int t = 0; t < 4; t++) {
+		int i = 0, j = 0, dir = 0;
+		switch (t) {
+			case 0:	i = dir = 1;
+				break;
+			case 1: j = dir = 1;
+				break;
+			case 2: i = dir = -1;
+				break;
+			case 3: j = dir = -1;
+				break;
+			default:
+				break;
+		}
+		for(;(h + i < BOARD_SIZE) && (w + j < BOARD_SIZE) && (h + i >= 0) && (w + j >= 0); t%2 == 0 ? i+=dir : j+=dir) {
+			if((!colour && board[h+i][w+j]->pieceColour == BLUE) ||
+			(colour && board[h+i][w+j]->pieceColour == RED)) break;
+			board[h+i][w+j]->threat[colour] = true;
+			if((!colour && board[h+i][w+j]->pieceColour == RED) ||
+			(colour && board[h+i][w+j]->pieceColour == BLUE)) break;
+		}
 	}
-
-	for(int i = h -1; i >= 0; i--) {
-		if((!colour && board[i][w]->pieceColour == BLUE) ||
-		(colour && board[i][w]->pieceColour == RED)) break;
-		board[i][w]->threat[colour] = true;
-		if((!colour && board[i][w]->pieceColour == RED) ||
-		(colour && board[i][w]->pieceColour == BLUE)) break;
-	}
-
-	for(int i = w +1; i < BOARD_SIZE; i++) {
-		if((!colour && board[h][i]->pieceColour == BLUE) ||
-		(colour && board[h][i]->pieceColour == RED)) break;
-		board[h][i]->threat[colour] = true;
-		if((!colour && board[h][i]->pieceColour == RED) ||
-		(colour && board[h][i]->pieceColour == BLUE)) break;
-	}
-
-	for(int i = w -1; i >= 0; i--) {
-		if((!colour && board[h][i]->pieceColour == BLUE) ||
-		(colour && board[h][i]->pieceColour == RED)) break;
-		board[h][i]->threat[colour] = true;
-		if((!colour && board[h][i]->pieceColour == RED) ||
-		(colour && board[h][i]->pieceColour == BLUE)) break;
-	}
-*/
 }
 
 int towerPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
-	int movementY = newLoc.h - oldLoc.h;
-	int movementX = newLoc.w - oldLoc.w;
 	bool colour = (pieceColour == BLUE) ? false : true;
 	int ret = MOVE_OK;
 
@@ -148,37 +134,27 @@ int towerPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 
 void bishopPiece::checkSquares(int h, int w){
 	bool colour = (pieceColour == BLUE) ? false : true;
-
-	for(int i = h +1, j = w +1; (i < BOARD_SIZE) && (j < BOARD_SIZE); i++,j++) {
-		if((!colour && board[i][j]->pieceColour == BLUE) ||
-		(colour && board[i][j]->pieceColour == RED)) break;
-		board[i][j]->threat[colour] = true;
-		if((!colour && board[i][j]->pieceColour == RED) ||
-		(colour && board[i][j]->pieceColour == BLUE)) break;
-	}
-
-	for(int i = h -1,j = w -1; (i >= 0) && (j >= 0); i--,j--) {
-		if((!colour && board[i][j]->pieceColour == BLUE) ||
-		(colour && board[i][j]->pieceColour == RED)) break;
-		board[i][j]->threat[colour] = true;
-		if((!colour && board[i][j]->pieceColour == RED) ||
-		(colour && board[i][j]->pieceColour == BLUE)) break;
-	}
-
-	for(int i = h +1, j = w -1; (i < BOARD_SIZE) && (j >= 0); i++,j--) {
-		if((!colour && board[i][j]->pieceColour == BLUE) ||
-		(colour && board[i][j]->pieceColour == RED)) break;
-		board[i][j]->threat[colour] = true;
-		if((!colour && board[i][j]->pieceColour == RED) ||
-		(colour && board[i][j]->pieceColour == BLUE)) break;
-	}
-
-	for(int i = h -1, j = w +1; (i >= 0) && (j < BOARD_SIZE); i--,j++) {
-		if((!colour && board[i][j]->pieceColour == BLUE) ||
-		(colour && board[i][j]->pieceColour == RED)) break;
-		board[i][j]->threat[colour] = true;
-		if((!colour && board[i][j]->pieceColour == RED) ||
-		(colour && board[i][j]->pieceColour == BLUE)) break;
+	for(int t = 0; t < 4; t++) {
+		int i = 0, j = 0, dir1 = 0, dir2 = 0;
+		switch (t) {
+			case 0:	i = dir2 = j = dir1 = 1;
+				break;
+			case 1: i = dir2 = j = dir1 = -1;
+				break;
+			case 2: i = dir2 = -1; j = dir1 = 1;
+				break;
+			case 3: i = dir2 = 1; j = dir1 = -1;
+				break;
+			default:
+				break;
+		}
+		for(;(h + i < BOARD_SIZE) && (w + j < BOARD_SIZE) && (h + i >= 0) && (w + j >= 0); j+=dir1, i+=dir2) {
+			if((!colour && board[h+i][w+j]->pieceColour == BLUE) ||
+			(colour && board[h+i][w+j]->pieceColour == RED)) break;
+			board[h+i][w+j]->threat[colour] = true;
+			if((!colour && board[h+i][w+j]->pieceColour == RED) ||
+			(colour && board[h+i][w+j]->pieceColour == BLUE)) break;
+		}
 	}
 }
 
@@ -213,10 +189,14 @@ int bishopPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 void horsePiece::checkSquares(int h, int w){
 	bool colour = (pieceColour == BLUE) ? false : true;
 	int horseMovement[2] = {1,2};
+	bool flip = false;
 
-//	for(int i = 0; i < 4; i++) {
-//		if(i);
-//	}
+	for(int i = 0; i < 8; i++,i%2 == 0 ? horseMovement[0]*=-1 : horseMovement[1]*=-1,flip = (i % 4 == 0) ? !flip : flip) {
+		if((h + horseMovement[flip] >= BOARD_SIZE) || (w + horseMovement[!flip] >= BOARD_SIZE) || (h + horseMovement[flip] < 0) || (w + horseMovement[!flip] < 0)) continue;
+		if((!colour && board[h+horseMovement[flip]][w+horseMovement[!flip]]->pieceColour == BLUE) ||
+		(colour && board[h+horseMovement[flip]][w+horseMovement[!flip]]->pieceColour == RED)) continue;
+		board[h+horseMovement[flip]][w+horseMovement[!flip]]->threat[colour] = true;
+	}
 }
 
 int horsePiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
@@ -245,8 +225,38 @@ int horsePiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 }
 
 void queenPiece::checkSquares(int h, int w){
-	int dirH = (pieceColour == BLUE) ? -1 : 1;
 	bool colour = (pieceColour == BLUE) ? false : true;
+	for(int t = 0; t < 8; t++) {
+		int i = 0, j = 0, dir1 = 0, dir2 = 0;
+		switch (t) {
+			case 0:	i = dir2 = j = dir1 = 1;
+				break;
+			case 1: i = dir2 = j = dir1 = -1;
+				break;
+			case 2: i = dir2 = -1; j = dir1 = 1;
+				break;
+			case 3: i = dir2 = 1; j = dir1 = -1;
+				break;
+			case 4:	i = dir1 = 1;
+				break;
+			case 5: j = dir1 = 1;
+				break;
+			case 6: i = dir1 = -1;
+				break;
+			case 7: j = dir1 = -1;
+				break;
+			default:
+				break;
+		}																				//t%2 == 0 ? i+=dir : j+=dir
+		for(;(h + i < BOARD_SIZE) && (w + j < BOARD_SIZE) && (h + i >= 0) && (w + j >= 0); t<4 ? j+=dir1, i+=dir2 : t%2 == 0 ? i+=dir1 : j+=dir1) {
+			if((!colour && board[h+i][w+j]->pieceColour == BLUE) ||
+			(colour && board[h+i][w+j]->pieceColour == RED)) break;
+			board[h+i][w+j]->threat[colour] = true;
+			if((!colour && board[h+i][w+j]->pieceColour == RED) ||
+			(colour && board[h+i][w+j]->pieceColour == BLUE)) break;
+		}
+	}
+	
 }
 
 int queenPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
@@ -279,8 +289,16 @@ int queenPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 }
 
 void kingPiece::checkSquares(int h, int w){
-	int dirH = (pieceColour == BLUE) ? -1 : 1;
 	bool colour = (pieceColour == BLUE) ? false : true;
+	int kingMovement[2] = {1,1};
+	bool flip = false;
+
+	for(int i = 0; i < 8; i++, (i % 2 == 0) ? kingMovement[0]*=-1 : kingMovement[1]*=-1, kingMovement[0] = (i >= 4) ? 0 : kingMovement[0], flip = (i % 6) ? flip : !flip ) {
+		if((h + kingMovement[flip] >= BOARD_SIZE) || (w + kingMovement[!flip] >= BOARD_SIZE) || (h + kingMovement[flip] < 0) || (w + kingMovement[!flip] < 0)) continue;
+		if((!colour && board[h+kingMovement[flip]][w+kingMovement[!flip]]->pieceColour == BLUE) ||
+		(colour && board[h+kingMovement[flip]][w+kingMovement[!flip]]->pieceColour == RED)) continue;
+		board[h+kingMovement[flip]][w+kingMovement[!flip]]->threat[colour] = true;
+	}
 }
 
 int kingPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
