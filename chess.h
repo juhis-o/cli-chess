@@ -2,6 +2,7 @@
 #define CHESS_H
 #include "kirous.h"
 #include <stdlib.h>
+#include <cstring>
 #include <vector>
 #include <memory>
 
@@ -15,7 +16,7 @@ class chessPiece {
         void moveEmptySpace(CursorLoc &newLoc, CursorLoc &oldLoc);
         void moveOccupiedSpace(CursorLoc &newLoc, CursorLoc &oldLoc);
         bool calcPath(CursorLoc &newLoc, CursorLoc &oldLoc);
-        enum errList{MOVE_OK,MOVE_NOT_VALID,CAPTURING_OWN_PIECE,PIECE_ON_PATH,MOVE_CANCEL};
+        enum errList{MOVE_OK,MOVE_NOT_VALID,CAPTURING_OWN_PIECE,PIECE_ON_PATH,MOVE_CANCEL,THREAT};
     public:
         chessPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef) : board(boardRef) {}
         virtual int move(CursorLoc &newLoc, CursorLoc &oldLoc) = 0;

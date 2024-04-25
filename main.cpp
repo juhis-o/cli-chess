@@ -1,5 +1,4 @@
 #include <iostream>
-#include <cstring>
 #include "chess.h"
 #include "kirous.h"
 

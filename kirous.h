@@ -12,7 +12,7 @@
 
 struct CursorLoc {
     int h,w;
-};
+}__attribute__((packed));
 
 class ChessBoard;
 
