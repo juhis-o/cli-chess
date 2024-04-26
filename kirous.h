@@ -4,14 +4,8 @@
 #ifndef KIROUS_H
 #define KIROUS_H
 
-#define RED_ON_WHITE 1
-#define RED_ON_BLACK 2
-#define BLUE_ON_WHITE 3
-#define BLUE_ON_BLACK 4
-#define TEXT_COLOUR 5
-
 struct CursorLoc {
-    int h,w;
+    int8_t h,w;
 }__attribute__((packed));
 
 class ChessBoard;
@@ -19,6 +13,7 @@ class ChessBoard;
 class chessUI {
     private:
         CursorLoc currentLoc, selectedLoc;
+        enum errList{DEFAULT,RED_ON_WHITE,RED_ON_BLACK,BLUE_ON_WHITE,BLUE_ON_BLACK,TEXT_COLOUR};
         bool selected = false;
         bool Init = false;
         bool playerTurn = true;

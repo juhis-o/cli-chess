@@ -19,7 +19,7 @@ void chessUI::updateInterface(ChessBoard &cBoard) {
 	for (int i = 0; i < BOARD_SIZE ; i++){
 		for (int j = 0; j < BOARD_SIZE; j++){
 			char c = cBoard.getPieceChar(i,j);
-			if(c != ' '){
+			if(c != ' '/*cBoard.getSquareThreat(i,j)*/){
 				attron(COLOR_PAIR(bg+cBoard.getPieceColour(i,j)));
 				addch(c);
 			}

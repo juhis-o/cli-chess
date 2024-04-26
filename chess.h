@@ -5,6 +5,7 @@
 #include <cstring>
 #include <vector>
 #include <memory>
+#include <cstdint>
 
 #define BOARD_SIZE 8
 #define RED 1
@@ -22,7 +23,7 @@ class chessPiece {
         virtual int move(CursorLoc &newLoc, CursorLoc &oldLoc) = 0;
         virtual void checkSquares(int h, int w) = 0;
         char chessChar = ' '; //Chess piece
-        int pieceColour; //Player colour
+        uint8_t pieceColour; //Player colour
         bool threat[2]{false,false};
         virtual ~chessPiece() = default;
 };
@@ -93,24 +94,24 @@ class kingPiece : public chessPiece {
 class ChessBoard {
     private:
         int turnCount = 0;
-        void FillRow(int row, int& unit_colour, std::vector<std::unique_ptr<chessPiece>>&Board);
+        void FillRow(int row, uint8_t& unit_colour, std::vector<std::unique_ptr<chessPiece>>&Board);
         std::vector<std::vector<std::unique_ptr<chessPiece>>> board;
         enum rows{BACKROW,FRONTROW,EMPTYROW};
     public:
         ChessBoard();
         int getPieceColour(int iter1, int iter2){return board[iter1][iter2]->pieceColour;};
         int getPieceChar(int iter1, int iter2){return board[iter1][iter2]->chessChar;};
-        bool getSquareThreat(int iter1, int iter2){return board[iter1][iter2]->threat[1];};
+        bool getSquareThreat(int iter1, int iter2){return board[iter1][iter2]->threat[0];};
         int movePiece(CursorLoc &newLoc, CursorLoc &oldLoc){
             int a = board[oldLoc.h][oldLoc.w]->move(newLoc,oldLoc);
-            for (int i = 0; i < BOARD_SIZE; i++){
-		        for(int j = 0; j < BOARD_SIZE; j++){
+            for (uint8_t i = 0; i < BOARD_SIZE; i++){
+		        for(uint8_t j = 0; j < BOARD_SIZE; j++){
 			        board[i][j]->threat[0] = false;
                     board[i][j]->threat[1] = false;
 		        }
 	        }
-            for (int i = 0; i < BOARD_SIZE; i++){
-		        for(int j = 0; j < BOARD_SIZE; j++){
+            for (uint8_t i = 0; i < BOARD_SIZE; i++){
+		        for(uint8_t j = 0; j < BOARD_SIZE; j++){
 			        if(board[i][j]->chessChar != ' ') board[i][j]->checkSquares(i,j);
 		        }
 	        }
