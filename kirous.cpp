@@ -7,7 +7,11 @@ chessUI::chessUI() {
     init_pair(RED_ON_BLACK, COLOR_RED, COLOR_BLACK); //Red player on black square
 	init_pair(BLUE_ON_WHITE, COLOR_BLUE, COLOR_WHITE); //Blue player on white square
     init_pair(BLUE_ON_BLACK, COLOR_BLUE, COLOR_BLACK); //Blue player on black square
-    init_pair(TEXT_COLOUR, COLOR_BLACK, COLOR_CYAN); //Text colour
+    init_pair(TEXT_COLOUR, COLOR_BLACK, COLOR_CYAN); //Text colour / Blue attackable Squares
+	#ifdef ThreatDebug
+	init_pair(TEMP1, COLOR_YELLOW, COLOR_RED); // Red attackable squares
+	init_pair(TEMP2, COLOR_YELLOW, COLOR_MAGENTA); //When both blue and red can attack on same square
+	#endif
     cbreak();
     noecho();
     keypad(stdscr, TRUE);
@@ -19,14 +23,35 @@ void chessUI::updateInterface(ChessBoard &cBoard) {
 	for (int i = 0; i < BOARD_SIZE ; i++){
 		for (int j = 0; j < BOARD_SIZE; j++){
 			char c = cBoard.getPieceChar(i,j);
-			if(c != ' '/*cBoard.getSquareThreat(i,j)*/){
+			#ifdef ThreatDebug
+			bool *threat = cBoard.getSquareThreat(i,j);
+			#endif
+			
+			if(c != ' '){
+				#ifdef ThreatDebug
+				if(threat[0] && !threat[1]) attron(COLOR_PAIR(TEXT_COLOUR));
+				else if(!threat[0] && threat[1])attron(COLOR_PAIR(TEMP1));
+				else if(threat[0] && threat[1]) attron(COLOR_PAIR(TEMP2));
+				else attron(COLOR_PAIR(bg+cBoard.getPieceColour(i,j)));
+				#endif
+				#ifndef ThreatDebug
 				attron(COLOR_PAIR(bg+cBoard.getPieceColour(i,j)));
+				#endif
 				addch(c);
 			}
 			else {
+				#ifdef ThreatDebug
+				if(threat[0] && !threat[1]) attron(COLOR_PAIR(TEXT_COLOUR));
+				else if(!threat[0] && threat[1])attron(COLOR_PAIR(TEMP1));
+				else if(threat[0] && threat[1]) attron(COLOR_PAIR(TEMP2));
+				else attron(COLOR_PAIR(bg+RED_ON_WHITE)); //Switches between black and white squares with bg
+				#endif
+				#ifndef ThreatDebug
 				attron(COLOR_PAIR(bg+RED_ON_WHITE)); //Switches between black and white squares with bg
+				#endif
 				addch(' ');
 			}
+
 			bg = !bg;
 		}
 		bg = !bg;
@@ -39,6 +64,7 @@ void chessUI::updateInterface(ChessBoard &cBoard) {
 	printw("Return code: %d %d", ret, selected);
 	}
 }
+
 
 void chessUI::freeSelect(ChessBoard &cBoard){
 	while((ch = getch()) != 'q'){

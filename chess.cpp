@@ -24,14 +24,11 @@ bool chessPiece::calcPath(CursorLoc &newLoc, CursorLoc &oldLoc){
 }
 
 void pawnPiece::checkSquares(int h, int w){
-	int8_t dirH = (pieceColour == BLUE) ? -1 : 1;
-	bool colour = (pieceColour == BLUE) ? false : true;
-
+	bool colour = pieceColour != BLUE;
+	int8_t dirH = colour ? 1 : -1;
+	
 	for(int8_t i = -1; i < 2; i+=2) {
 		if((h+dirH) >= 0 && (h+dirH) < BOARD_SIZE && (w+i) >= 0 && (w+i) < BOARD_SIZE) {
-			if((colour && board[h+dirH][w+i]->pieceColour == BLUE) ||
-			(!colour && board[h+dirH][w+i]->pieceColour == RED) ||
-			board[h+dirH][w+i]->chessChar == ' ') 
 			board[h+dirH][w+i]->threat[colour] = true;
 		}
 	}
@@ -41,7 +38,7 @@ int pawnPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 	int8_t movementY = newLoc.h - oldLoc.h;
 	int8_t movementX = newLoc.w - oldLoc.w;
 	int ret = MOVE_OK;
-	bool direction = (pieceColour == BLUE) ? false : true;
+	bool direction = pieceColour != BLUE;
 
 	if(memcmp(&newLoc,&oldLoc,sizeof(newLoc)) == 0) return -MOVE_CANCEL;
 
@@ -74,9 +71,10 @@ int pawnPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 }
 
 void towerPiece::checkSquares(int h, int w){
-	bool colour = (pieceColour == BLUE) ? false : true;
+	bool colour = pieceColour != BLUE;
 	for(uint8_t t = 0; t < 4; t++) {
 		int8_t i = 0, j = 0, dir = 0;
+		bool piecePassed = false;
 		switch (t) {
 			case 0:	i = dir = 1;
 				break;
@@ -90,17 +88,17 @@ void towerPiece::checkSquares(int h, int w){
 				break;
 		}
 		for(;(h + i < BOARD_SIZE) && (w + j < BOARD_SIZE) && (h + i >= 0) && (w + j >= 0); t%2 == 0 ? i+=dir : j+=dir) {
-			if((!colour && board[h+i][w+j]->pieceColour == BLUE) ||
-			(colour && board[h+i][w+j]->pieceColour == RED)) break;
 			board[h+i][w+j]->threat[colour] = true;
-			if((!colour && board[h+i][w+j]->pieceColour == RED) ||
-			(colour && board[h+i][w+j]->pieceColour == BLUE)) break;
+			if(piecePassed || board[h+i][w+j]->chessChar != ' ') {
+				if((board[h+i][w+j]->chessChar == 'K')) piecePassed = true;
+				else break;
+			}
 		}
 	}
 }
 
 int towerPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
-	bool colour = (pieceColour == BLUE) ? false : true;
+	bool colour = pieceColour != BLUE;
 	int ret = MOVE_OK;
 
 	if(memcmp(&newLoc,&oldLoc,sizeof(newLoc)) == 0) return -MOVE_CANCEL;
@@ -126,8 +124,9 @@ int towerPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 }
 
 void bishopPiece::checkSquares(int h, int w){
-	bool colour = (pieceColour == BLUE) ? false : true;
+	bool colour = pieceColour != BLUE;
 	for(uint8_t t = 0; t < 4; t++) {
+		bool piecePassed = false;
 		int8_t i = 0, j = 0, dir1 = 0, dir2 = 0;
 		switch (t) {
 			case 0:	i = dir2 = j = dir1 = 1;
@@ -142,11 +141,11 @@ void bishopPiece::checkSquares(int h, int w){
 				break;
 		}
 		for(;(h + i < BOARD_SIZE) && (w + j < BOARD_SIZE) && (h + i >= 0) && (w + j >= 0); j+=dir1, i+=dir2) {
-			if((!colour && board[h+i][w+j]->pieceColour == BLUE) ||
-			(colour && board[h+i][w+j]->pieceColour == RED)) break;
 			board[h+i][w+j]->threat[colour] = true;
-			if((!colour && board[h+i][w+j]->pieceColour == RED) ||
-			(colour && board[h+i][w+j]->pieceColour == BLUE)) break;
+			if(piecePassed || board[h+i][w+j]->chessChar != ' ') {
+				if((board[h+i][w+j]->chessChar == 'K')) piecePassed = true;
+				else break;
+			}
 		}
 	}
 }
@@ -154,7 +153,7 @@ void bishopPiece::checkSquares(int h, int w){
 int bishopPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 	int8_t movementY = newLoc.h - oldLoc.h;
 	int8_t movementX = newLoc.w - oldLoc.w;
-	bool colour = (pieceColour == BLUE) ? false : true;
+	bool colour = pieceColour != BLUE;
 	int ret = MOVE_OK;
 
 	if(memcmp(&newLoc,&oldLoc,sizeof(newLoc)) == 0) return -MOVE_CANCEL;
@@ -180,14 +179,12 @@ int bishopPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 }
 
 void horsePiece::checkSquares(int h, int w){
-	bool colour = (pieceColour == BLUE) ? false : true;
+	bool colour = pieceColour != BLUE;
 	int8_t horseMovement[2] = {1,2};
 	bool flip = false;
 
-	for(int i = 0; i < 8; i++,i%2 == 0 ? horseMovement[0]*=-1 : horseMovement[1]*=-1,flip = (i % 4 == 0) ? !flip : flip) {
+	for(int i = 0; i < 8; i++, !(i%2) ? horseMovement[0]*=-1 : horseMovement[1]*=-1, flip = !(i%4) ? !flip : flip) {
 		if((h + horseMovement[flip] >= BOARD_SIZE) || (w + horseMovement[!flip] >= BOARD_SIZE) || (h + horseMovement[flip] < 0) || (w + horseMovement[!flip] < 0)) continue;
-		if((!colour && board[h+horseMovement[flip]][w+horseMovement[!flip]]->pieceColour == BLUE) ||
-		(colour && board[h+horseMovement[flip]][w+horseMovement[!flip]]->pieceColour == RED)) continue;
 		board[h+horseMovement[flip]][w+horseMovement[!flip]]->threat[colour] = true;
 	}
 }
@@ -195,7 +192,7 @@ void horsePiece::checkSquares(int h, int w){
 int horsePiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 	int8_t movementY = newLoc.h - oldLoc.h;
 	int8_t movementX = newLoc.w - oldLoc.w;
-	bool colour = (pieceColour == BLUE) ? false : true;
+	bool colour = pieceColour != BLUE;
 	int ret = MOVE_OK;
 
 	if(memcmp(&newLoc,&oldLoc,sizeof(newLoc)) == 0) return -MOVE_CANCEL;
@@ -213,14 +210,14 @@ int horsePiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 		}
 	}
 	else ret = -MOVE_NOT_VALID;
-
 	return ret;
 }
 
 void queenPiece::checkSquares(int h, int w){
-	bool colour = (pieceColour == BLUE) ? false : true;
+	bool colour = pieceColour != BLUE;
 	for(uint8_t t = 0; t < 8; t++) {
 		int8_t i = 0, j = 0, dir1 = 0, dir2 = 0;
+		bool piecePassed = false;
 		switch (t) {
 			case 0:	i = dir2 = j = dir1 = 1;
 				break;
@@ -241,21 +238,20 @@ void queenPiece::checkSquares(int h, int w){
 			default:
 				break;
 		}											
-		for(;(h + i < BOARD_SIZE) && (w + j < BOARD_SIZE) && (h + i >= 0) && (w + j >= 0); t<4 ? j+=dir1, i+=dir2 : t%2 == 0 ? i+=dir1 : j+=dir1) {
-			if((!colour && board[h+i][w+j]->pieceColour == BLUE) ||
-			(colour && board[h+i][w+j]->pieceColour == RED)) break;
+		for(;(h + i < BOARD_SIZE) && (w + j < BOARD_SIZE) && (h + i >= 0) && (w + j >= 0); t<4 ? j+=dir1, i+=dir2 : !(t%2) ? i+=dir1 : j+=dir1) {
 			board[h+i][w+j]->threat[colour] = true;
-			if((!colour && board[h+i][w+j]->pieceColour == RED) ||
-			(colour && board[h+i][w+j]->pieceColour == BLUE)) break;
+			if(piecePassed || board[h+i][w+j]->chessChar != ' ') {
+				if((board[h+i][w+j]->chessChar == 'K')) piecePassed = true;
+				else break;
+			}
 		}
 	}
-	
 }
 
 int queenPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 	int8_t movementY = newLoc.h - oldLoc.h;
 	int8_t movementX = newLoc.w - oldLoc.w;
-	bool colour = (pieceColour == BLUE) ? false : true;
+	bool colour = pieceColour != BLUE;
 	int ret = MOVE_OK;
 
 	if(memcmp(&newLoc,&oldLoc,sizeof(newLoc)) == 0) return -MOVE_CANCEL;
@@ -277,28 +273,24 @@ int queenPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 	}
 	else ret = -MOVE_NOT_VALID;
 
-
 	return ret;
 }
 
 void kingPiece::checkSquares(int h, int w){
-	bool colour = (pieceColour == BLUE) ? false : true;
+	bool colour = pieceColour != BLUE;
 	int8_t kingMovement[2] = {1,1};
 	bool flip = false;
 
-	for(int i = 0; i < 8; i++, (i % 2 == 0) ? kingMovement[0]*=-1 : kingMovement[1]*=-1, kingMovement[0] = (i >= 4) ? 0 : kingMovement[0], flip = (i % 6) ? flip : !flip ) {
+	for(int i = 0; i < 8; i++, !(i % 2) ? kingMovement[0]*=-1 : kingMovement[1]*=-1, kingMovement[0] = !(i%4) ? 0 : kingMovement[0], flip = (i % 6) ? flip : !flip ) {
 		if((h + kingMovement[flip] >= BOARD_SIZE) || (w + kingMovement[!flip] >= BOARD_SIZE) || (h + kingMovement[flip] < 0) || (w + kingMovement[!flip] < 0)) continue;
-		if((!colour && board[h+kingMovement[flip]][w+kingMovement[!flip]]->pieceColour == BLUE) ||
-		(colour && board[h+kingMovement[flip]][w+kingMovement[!flip]]->pieceColour == RED)) continue;
 		board[h+kingMovement[flip]][w+kingMovement[!flip]]->threat[colour] = true;
 	}
-
 }
 
 int kingPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 	int8_t movementY = newLoc.h - oldLoc.h;
 	int8_t movementX = newLoc.w - oldLoc.w;
-	bool colour = (pieceColour == BLUE) ? false : true;
+	bool colour = pieceColour != BLUE;
 	int ret = MOVE_OK;
 
 	if(memcmp(&newLoc,&oldLoc,sizeof(newLoc)) == 0) return -MOVE_CANCEL;
@@ -311,7 +303,8 @@ int kingPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 		else {
             if ((colour && board[newLoc.h][newLoc.w]->pieceColour == BLUE) ||
                 (!colour && board[newLoc.h][newLoc.w]->pieceColour == RED)) {
-				moveOccupiedSpace(newLoc, oldLoc);
+				if(!board[newLoc.h][newLoc.w]->threat[!colour]) moveOccupiedSpace(newLoc, oldLoc);
+				else ret = -THREAT;
 			}
 			else ret = -CAPTURING_OWN_PIECE;
 		}
@@ -338,13 +331,8 @@ ChessBoard::ChessBoard() {
 				break;
 		}
 		if(i == 1) unit_colour+=2;
-	    }
-	
-	for (int i = 0; i < BOARD_SIZE; i++){
-		for(int j = 0; j < BOARD_SIZE; j++){
-			if(board[i][j]->chessChar != ' ') board[i][j]->checkSquares(i,j);
-		}
 	}
+	updateThreatSquares(false);
 }
 
 void ChessBoard::FillRow(int row, uint8_t& unit_colour, std::vector<std::unique_ptr<chessPiece>>&Board) {
@@ -376,7 +364,58 @@ void ChessBoard::FillRow(int row, uint8_t& unit_colour, std::vector<std::unique_
 		default:
 			for(int i = 0; i < BOARD_SIZE; i++){
 				Board[i] = std::make_unique<emptyPiece>(board);
+				Board[i]->pieceColour = 0;
 			}
 			break;
 	}
 }
+
+void ChessBoard::updateThreatSquares(bool reset) {
+	if(reset) {
+		for (uint8_t i = 0; i < BOARD_SIZE; i++){
+			for(uint8_t j = 0; j < BOARD_SIZE; j++){
+				board[i][j]->threat[0] = false;
+				board[i][j]->threat[1] = false;
+			}
+		}
+	}
+
+    for (uint8_t i = 0; i < BOARD_SIZE; i++){
+		for(uint8_t j = 0; j < BOARD_SIZE; j++){
+			if(board[i][j]->chessChar != ' ') board[i][j]->checkSquares(i,j);
+		}
+	}
+}
+
+/*
+void ChessBoard::FillRow(int row, uint8_t& unit_colour, std::vector<std::unique_ptr<chessPiece>>&Board) {
+	switch(row) {
+		case BACKROW:
+
+			for(int i = 0; i < 3; i++){
+				Board[i] = std::make_unique<emptyPiece>(board);
+			}
+       		Board[3] = std::make_unique<kingPiece>(board);
+			Board[3]->pieceColour = unit_colour;
+			for(int i = 4; i < 8; i++){
+				Board[i] = std::make_unique<emptyPiece>(board);
+			}
+			break;
+		case FRONTROW:
+			for(int i = 0; i < 3; i++){
+				Board[i] = std::make_unique<emptyPiece>(board);
+			}
+			Board[3] = std::make_unique<queenPiece>(board);
+			Board[3]->pieceColour = unit_colour;
+			for(int i = 4; i < 8; i++){
+				Board[i] = std::make_unique<emptyPiece>(board);
+			}
+			break;
+
+		default:
+			for(int i = 0; i < BOARD_SIZE; i++){
+				Board[i] = std::make_unique<emptyPiece>(board);
+			}
+			break;
+	}
+}*/

@@ -1,4 +1,5 @@
 cli-chess/
 a.out
 .vscode/
+*.json
 *.o

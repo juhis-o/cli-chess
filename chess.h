@@ -17,7 +17,8 @@ class chessPiece {
         void moveEmptySpace(CursorLoc &newLoc, CursorLoc &oldLoc);
         void moveOccupiedSpace(CursorLoc &newLoc, CursorLoc &oldLoc);
         bool calcPath(CursorLoc &newLoc, CursorLoc &oldLoc);
-        enum errList{MOVE_OK,MOVE_NOT_VALID,CAPTURING_OWN_PIECE,PIECE_ON_PATH,MOVE_CANCEL,THREAT};
+        enum errList : uint8_t {MOVE_OK,MOVE_NOT_VALID,CAPTURING_OWN_PIECE,PIECE_ON_PATH,MOVE_CANCEL,THREAT};
+
     public:
         chessPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef) : board(boardRef) {}
         virtual int move(CursorLoc &newLoc, CursorLoc &oldLoc) = 0;
@@ -93,29 +94,20 @@ class kingPiece : public chessPiece {
 
 class ChessBoard {
     private:
-        int turnCount = 0;
         void FillRow(int row, uint8_t& unit_colour, std::vector<std::unique_ptr<chessPiece>>&Board);
+        void updateThreatSquares(bool reset);
         std::vector<std::vector<std::unique_ptr<chessPiece>>> board;
         enum rows{BACKROW,FRONTROW,EMPTYROW};
     public:
         ChessBoard();
         int getPieceColour(int iter1, int iter2){return board[iter1][iter2]->pieceColour;};
         int getPieceChar(int iter1, int iter2){return board[iter1][iter2]->chessChar;};
-        bool getSquareThreat(int iter1, int iter2){return board[iter1][iter2]->threat[0];};
+        bool* getSquareThreat(int iter1, int iter2){return board[iter1][iter2]->threat;};
         int movePiece(CursorLoc &newLoc, CursorLoc &oldLoc){
             int a = board[oldLoc.h][oldLoc.w]->move(newLoc,oldLoc);
-            for (uint8_t i = 0; i < BOARD_SIZE; i++){
-		        for(uint8_t j = 0; j < BOARD_SIZE; j++){
-			        board[i][j]->threat[0] = false;
-                    board[i][j]->threat[1] = false;
-		        }
-	        }
-            for (uint8_t i = 0; i < BOARD_SIZE; i++){
-		        for(uint8_t j = 0; j < BOARD_SIZE; j++){
-			        if(board[i][j]->chessChar != ' ') board[i][j]->checkSquares(i,j);
-		        }
-	        }
-            return a;};
+            updateThreatSquares(true);
+            return a;
+        };
 };
 
 #endif
