@@ -17,7 +17,7 @@ chessUI::chessUI() {
     keypad(stdscr, TRUE);
 }
 
-void chessUI::updateInterface(ChessBoard &cBoard) {
+void chessUI::updateInterface(ChessBoard &cBoard, int ret) {
 	clear();
 	bool bg = 1;
 	for (int i = 0; i < BOARD_SIZE ; i++){
@@ -51,72 +51,50 @@ void chessUI::updateInterface(ChessBoard &cBoard) {
 				#endif
 				addch(' ');
 			}
-
 			bg = !bg;
 		}
 		bg = !bg;
 		addch('\n');
 	}
-
 	attron(COLOR_PAIR(TEXT_COLOUR));
 	if(!Init){getyx(stdscr,currentLoc.h,currentLoc.w);Init = true;}
 	else {
-	printw("Return code: %d %d", ret, selected);
+	printw("Return code: %d", ret);
 	}
+	move(currentLoc.h, currentLoc.w);
+	refresh();
 }
 
 
-void chessUI::freeSelect(ChessBoard &cBoard){
-	while((ch = getch()) != 'q'){
+int chessUI::Select(CursorLoc& loc){
+	int a = false;
+	while(!a){
+		ch = getch();
 		switch (ch) {
+			case 10: //Enter key
+				loc = currentLoc;
+				a = true;
+				break;
+			case 'q':
+				a = -6;
+				break;
+			case KEY_DOWN:
+				currentLoc.h++;
+				break;
+			case KEY_UP:
+				currentLoc.h--;
+				break;
 			case KEY_LEFT:
 				currentLoc.w--;
 				break;
 			case KEY_RIGHT:
 				currentLoc.w++;
 				break;
-			case KEY_UP:
-				currentLoc.h--;
-				break;
-			case KEY_DOWN:
-				currentLoc.h++;
-				break;
-			case 10:
-				enterPressed(cBoard);
-			break;
 		}
 		move(currentLoc.h, currentLoc.w);
 		refresh();
 	}
-}
-
-void chessUI::enterPressed(ChessBoard &cBoard) {
-	if(!selected) {
-		if (currentLoc.h >= 0 && currentLoc.h < BOARD_SIZE &&
-            currentLoc.w >= 0 && currentLoc.w < BOARD_SIZE) {
-			char c = cBoard.getPieceChar(currentLoc.h,currentLoc.w);
-			int color = cBoard.getPieceColour(currentLoc.h,currentLoc.w);
-			if((c != ' ') &&
-			 ((playerTurn && color == BLUE) || 
-			 (!playerTurn && color == RED))) {
-				selectedLoc = currentLoc;
-				selected = true;
-			}
-		}
-		else ret = -100;
-	}
-	else {
-		if (currentLoc.h >= 0 && currentLoc.h < BOARD_SIZE &&
-            currentLoc.w >= 0 && currentLoc.w < BOARD_SIZE) {
-				ret = cBoard.movePiece(currentLoc,selectedLoc);
-				if(ret == 0) {
-					playerTurn = !playerTurn;
-				}
-				selected = false;
-			}
-		else ret = -100;
-	}
-	updateInterface(cBoard);
+	return a;
 }
 
 chessUI::~chessUI() {

@@ -16,18 +16,14 @@ class chessUI {
     private:
         CursorLoc currentLoc, selectedLoc;
         enum errList : uint8_t {DEFAULT,RED_ON_WHITE,RED_ON_BLACK,BLUE_ON_WHITE,BLUE_ON_BLACK,TEXT_COLOUR,TEMP1,TEMP2};
-        bool selected = false;
         bool Init = false;
-        bool playerTurn = true;
         int ch;
-        int ret = 0;
 
     public:
         chessUI();
         ~chessUI();
-        void freeSelect(ChessBoard &cBoard);
-        void enterPressed(ChessBoard &cBoard);
-        void updateInterface(ChessBoard &cBoard);
+        int Select(CursorLoc& loc);
+        void updateInterface(ChessBoard &cBoard, int ret);
 
 };
 
