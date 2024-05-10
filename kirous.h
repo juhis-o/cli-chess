@@ -7,7 +7,7 @@
 //#define ThreatDebug
 
 struct CursorLoc {
-    int8_t h,w;
+    int8_t h = 0, w = 0;
 }__attribute__((packed));
 
 class ChessBoard;
@@ -18,12 +18,11 @@ class chessUI {
         enum errList : uint8_t {DEFAULT,RED_ON_WHITE,RED_ON_BLACK,BLUE_ON_WHITE,BLUE_ON_BLACK,TEXT_COLOUR,TEMP1,TEMP2};
         bool Init = false;
         int ch;
-
     public:
         chessUI();
         ~chessUI();
         int Select(CursorLoc& loc);
-        void updateInterface(ChessBoard &cBoard, int ret);
+        void updateInterface(ChessBoard &cBoard, int ret,char* debug);
 
 };
 

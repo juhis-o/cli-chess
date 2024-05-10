@@ -17,7 +17,7 @@ chessUI::chessUI() {
     keypad(stdscr, TRUE);
 }
 
-void chessUI::updateInterface(ChessBoard &cBoard, int ret) {
+void chessUI::updateInterface(ChessBoard &cBoard, int ret,char* debug) {
 	clear();
 	bool bg = 1;
 	for (int i = 0; i < BOARD_SIZE ; i++){
@@ -59,7 +59,7 @@ void chessUI::updateInterface(ChessBoard &cBoard, int ret) {
 	attron(COLOR_PAIR(TEXT_COLOUR));
 	if(!Init){getyx(stdscr,currentLoc.h,currentLoc.w);Init = true;}
 	else {
-	printw("Return code: %d", ret);
+	printw("Return code: %d; %s", ret,debug);
 	}
 	move(currentLoc.h, currentLoc.w);
 	refresh();

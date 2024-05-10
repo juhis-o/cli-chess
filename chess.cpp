@@ -379,10 +379,15 @@ void ChessBoard::updateThreatSquares(bool reset) {
 			}
 		}
 	}
-
     for (uint8_t i = 0; i < BOARD_SIZE; i++){
 		for(uint8_t j = 0; j < BOARD_SIZE; j++){
-			if(board[i][j]->chessChar != ' ') board[i][j]->checkSquares(i,j);
+			if(board[i][j]->chessChar != ' '){
+				board[i][j]->checkSquares(i,j);
+				if(board[i][j]->chessChar == 'K') {
+				bool colour = board[i][j]->pieceColour != BLUE;
+				KingLoc[colour] = {(int8_t)i,(int8_t)j};
+				}
+			}
 		}
 	}
 }
