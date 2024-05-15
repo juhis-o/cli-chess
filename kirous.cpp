@@ -10,14 +10,16 @@ chessUI::chessUI() {
     init_pair(TEXT_COLOUR, COLOR_BLACK, COLOR_CYAN); //Text colour / Blue attackable Squares
 	#ifdef ThreatDebug
 	init_pair(TEMP1, COLOR_YELLOW, COLOR_RED); // Red attackable squares
-	init_pair(TEMP2, COLOR_YELLOW, COLOR_MAGENTA); //When both blue and red can attack on same square
+	init_pair(TEMP2, COLOR_YELLOW, COLOR_MAGENTA); // When both blue and red can attack on same square
+	init_pair(TEMP3, COLOR_BLACK, COLOR_YELLOW); // Red attackable squares
+	init_pair(TEMP4, COLOR_YELLOW, COLOR_WHITE); // When both blue and red can attack on same square
 	#endif
     cbreak();
     noecho();
     keypad(stdscr, TRUE);
 }
 
-void chessUI::updateInterface(ChessBoard &cBoard, int ret,char* debug) {
+void chessUI::updateInterface(ChessBoard &cBoard, int ret, char* debug) {
 	clear();
 	bool bg = 1;
 	for (int i = 0; i < BOARD_SIZE ; i++){
@@ -25,13 +27,17 @@ void chessUI::updateInterface(ChessBoard &cBoard, int ret,char* debug) {
 			char c = cBoard.getPieceChar(i,j);
 			#ifdef ThreatDebug
 			bool *threat = cBoard.getSquareThreat(i,j);
+			bool kThreat = cBoard.getKingThreat(i,j);
 			#endif
 			
 			if(c != ' '){
 				#ifdef ThreatDebug
+				
 				if(threat[0] && !threat[1]) attron(COLOR_PAIR(TEXT_COLOUR));
 				else if(!threat[0] && threat[1])attron(COLOR_PAIR(TEMP1));
 				else if(threat[0] && threat[1]) attron(COLOR_PAIR(TEMP2));
+				
+				//if(kThreat) attron(COLOR_PAIR(TEMP4));
 				else attron(COLOR_PAIR(bg+cBoard.getPieceColour(i,j)));
 				#endif
 				#ifndef ThreatDebug
@@ -41,9 +47,12 @@ void chessUI::updateInterface(ChessBoard &cBoard, int ret,char* debug) {
 			}
 			else {
 				#ifdef ThreatDebug
+				
 				if(threat[0] && !threat[1]) attron(COLOR_PAIR(TEXT_COLOUR));
 				else if(!threat[0] && threat[1])attron(COLOR_PAIR(TEMP1));
 				else if(threat[0] && threat[1]) attron(COLOR_PAIR(TEMP2));
+				
+				//if(kThreat) attron(COLOR_PAIR(TEMP4));
 				else attron(COLOR_PAIR(bg+RED_ON_WHITE)); //Switches between black and white squares with bg
 				#endif
 				#ifndef ThreatDebug

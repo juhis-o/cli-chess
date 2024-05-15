@@ -23,13 +23,19 @@ bool chessPiece::calcPath(CursorLoc &newLoc, CursorLoc &oldLoc){
     return true;
 }
 
-void pawnPiece::checkSquares(int h, int w){
+void pawnPiece::checkSquares(int h, int w, std::vector<ThreatLoc>& loc){
 	bool colour = pieceColour != BLUE;
 	int8_t dirH = colour ? 1 : -1;
 	
 	for(int8_t i = -1; i < 2; i+=2) {
 		if((h+dirH) >= 0 && (h+dirH) < BOARD_SIZE && (w+i) >= 0 && (w+i) < BOARD_SIZE) {
 			board[h+dirH][w+i]->threat[colour] = true;
+			if((board[h+dirH][w+i]->chessChar == 'K') && ((colour && board[h+dirH][w+i]->pieceColour == BLUE) ||
+			(!colour && board[h+dirH][w+i]->pieceColour == RED))) {
+				threatensKing = true;
+				ThreatLoc newThreat{(int8_t)h,(int8_t)w,false};
+				loc.push_back(newThreat);
+			}
 		}
 	}
 }
@@ -70,7 +76,7 @@ int pawnPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 	return ret;
 }
 
-void towerPiece::checkSquares(int h, int w){
+void towerPiece::checkSquares(int h, int w, std::vector<ThreatLoc>& loc){
 	bool colour = pieceColour != BLUE;
 	for(uint8_t t = 0; t < 4; t++) {
 		int8_t i = 0, j = 0, dir = 0;
@@ -90,7 +96,14 @@ void towerPiece::checkSquares(int h, int w){
 		for(;(h + i < BOARD_SIZE) && (w + j < BOARD_SIZE) && (h + i >= 0) && (w + j >= 0); t%2 == 0 ? i+=dir : j+=dir) {
 			board[h+i][w+j]->threat[colour] = true;
 			if(piecePassed || board[h+i][w+j]->chessChar != ' ') {
-				if((board[h+i][w+j]->chessChar == 'K')) piecePassed = true;
+				if((board[h+i][w+j]->chessChar == 'K')) {
+					piecePassed = true;
+					if((colour && board[h+i][w+j]->pieceColour == BLUE) || (!colour && board[h+i][w+j]->pieceColour == RED)) {
+						ThreatLoc newThreat{(int8_t)h,(int8_t)w,false};
+						loc.push_back(newThreat);
+						threatensKing = true;
+					}
+				}
 				else break;
 			}
 		}
@@ -119,11 +132,10 @@ int towerPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 		else ret = -PIECE_ON_PATH;
 	}
 	else ret = -MOVE_NOT_VALID;
-
 	return ret;
 }
 
-void bishopPiece::checkSquares(int h, int w){
+void bishopPiece::checkSquares(int h, int w, std::vector<ThreatLoc>& loc){
 	bool colour = pieceColour != BLUE;
 	for(uint8_t t = 0; t < 4; t++) {
 		bool piecePassed = false;
@@ -143,7 +155,14 @@ void bishopPiece::checkSquares(int h, int w){
 		for(;(h + i < BOARD_SIZE) && (w + j < BOARD_SIZE) && (h + i >= 0) && (w + j >= 0); j+=dir1, i+=dir2) {
 			board[h+i][w+j]->threat[colour] = true;
 			if(piecePassed || board[h+i][w+j]->chessChar != ' ') {
-				if((board[h+i][w+j]->chessChar == 'K')) piecePassed = true;
+				if((board[h+i][w+j]->chessChar == 'K')) {
+					piecePassed = true;
+					if((colour && board[h+i][w+j]->pieceColour == BLUE) || (!colour && board[h+i][w+j]->pieceColour == RED)){
+						ThreatLoc newThreat{(int8_t)h,(int8_t)w,false};
+						loc.push_back(newThreat);
+						threatensKing = true;
+					}
+				}
 				else break;
 			}
 		}
@@ -178,7 +197,7 @@ int bishopPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 	return ret;
 }
 
-void horsePiece::checkSquares(int h, int w){
+void horsePiece::checkSquares(int h, int w, std::vector<ThreatLoc>& loc){
 	bool colour = pieceColour != BLUE;
 	int8_t horseMovement[2] = {1,2};
 	bool flip = false;
@@ -186,6 +205,14 @@ void horsePiece::checkSquares(int h, int w){
 	for(int i = 0; i < 8; i++, !(i%2) ? horseMovement[0]*=-1 : horseMovement[1]*=-1, flip = !(i%4) ? !flip : flip) {
 		if((h + horseMovement[flip] >= BOARD_SIZE) || (w + horseMovement[!flip] >= BOARD_SIZE) || (h + horseMovement[flip] < 0) || (w + horseMovement[!flip] < 0)) continue;
 		board[h+horseMovement[flip]][w+horseMovement[!flip]]->threat[colour] = true;
+		if((board[h+horseMovement[flip]][w+horseMovement[!flip]]->chessChar == 'K')) {
+			if((colour && board[h+horseMovement[flip]][w+horseMovement[!flip]]->pieceColour == BLUE) ||
+			(!colour && board[h+horseMovement[flip]][w+horseMovement[!flip]]->pieceColour == RED)){
+				ThreatLoc newThreat{(int8_t)h,(int8_t)w,false};
+				loc.push_back(newThreat);
+				threatensKing = true;
+			}
+		}
 	}
 }
 
@@ -213,7 +240,7 @@ int horsePiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 	return ret;
 }
 
-void queenPiece::checkSquares(int h, int w){
+void queenPiece::checkSquares(int h, int w, std::vector<ThreatLoc>& loc){
 	bool colour = pieceColour != BLUE;
 	for(uint8_t t = 0; t < 8; t++) {
 		int8_t i = 0, j = 0, dir1 = 0, dir2 = 0;
@@ -241,7 +268,14 @@ void queenPiece::checkSquares(int h, int w){
 		for(;(h + i < BOARD_SIZE) && (w + j < BOARD_SIZE) && (h + i >= 0) && (w + j >= 0); t<4 ? j+=dir1, i+=dir2 : !(t%2) ? i+=dir1 : j+=dir1) {
 			board[h+i][w+j]->threat[colour] = true;
 			if(piecePassed || board[h+i][w+j]->chessChar != ' ') {
-				if((board[h+i][w+j]->chessChar == 'K')) piecePassed = true;
+				if((board[h+i][w+j]->chessChar == 'K')) {
+					if((colour && board[h+i][w+j]->pieceColour == BLUE) || (!colour && board[h+i][w+j]->pieceColour == RED)) {
+						ThreatLoc newThreat{(int8_t)h,(int8_t)w,false};
+						loc.push_back(newThreat);
+						threatensKing = true;
+					}
+					piecePassed = true;
+				}
 				else break;
 			}
 		}
@@ -276,11 +310,12 @@ int queenPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 	return ret;
 }
 
-void kingPiece::checkSquares(int h, int w){
+void kingPiece::checkSquares(int h, int w, std::vector<ThreatLoc>& loc){
+	(void)loc;
 	bool colour = pieceColour != BLUE;
-	int8_t kingMovement[2] = {1,1};
 	bool flip = false;
-
+	int8_t kingMovement[2] = {1,1};
+	
 	for(int i = 0; i < 8; i++, !(i % 2) ? kingMovement[0]*=-1 : kingMovement[1]*=-1, kingMovement[0] = !(i%4) ? 0 : kingMovement[0], flip = (i % 6) ? flip : !flip ) {
 		if((h + kingMovement[flip] >= BOARD_SIZE) || (w + kingMovement[!flip] >= BOARD_SIZE) || (h + kingMovement[flip] < 0) || (w + kingMovement[!flip] < 0)) continue;
 		board[h+kingMovement[flip]][w+kingMovement[!flip]]->threat[colour] = true;
@@ -312,6 +347,59 @@ int kingPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 	else ret = -MOVE_NOT_VALID;
 
 	return ret;
+}
+
+bool ChessBoard::checkmate(CursorLoc& KingLoc){
+	bool colour = board[KingLoc.h][KingLoc.w]->pieceColour != BLUE;
+//	bool CheckMate = false;
+//	if(!board[KingLoc.h][KingLoc.w]->threat[!colour]) return false; //No piece is threatening king
+//	if(canKingMove(KingLoc)) return false; //King can move out of threat square
+	if(!threatPath.empty()) {
+		for (auto x : threatPath) {
+		if(findOverlaps(KingLoc, x)) return false; //Threatening piece can be captured or other piece can move in its way
+		}
+	}
+
+	
+	return true;
+}
+
+
+bool ChessBoard::canKingMove(CursorLoc& KingLoc){
+	bool colour = board[KingLoc.h][KingLoc.w]->pieceColour != BLUE;
+	bool flip = false;
+	int8_t kingMovement[2] = {1,1};
+	bool canMove = false;
+	
+	for(int i = 0; i < 8; i++, !(i % 2) ? kingMovement[0]*=-1 : kingMovement[1]*=-1, kingMovement[0] = !(i%4) ? 0 : kingMovement[0], flip = (i % 6) ? flip : !flip ) {
+		if((KingLoc.h + kingMovement[flip] >= BOARD_SIZE) || (KingLoc.w + kingMovement[!flip] >= BOARD_SIZE) || (KingLoc.h + kingMovement[flip] < 0) || (KingLoc.w + kingMovement[!flip] < 0)) continue;
+		if(!board[KingLoc.h+kingMovement[flip]][KingLoc.w+kingMovement[!flip]]->threat[!colour] ||
+		!(board[KingLoc.h+kingMovement[flip]][KingLoc.w+kingMovement[!flip]]->pieceColour == board[KingLoc.h][KingLoc.w]->pieceColour)){
+			canMove = true;
+			break;
+		}
+	}
+	return canMove;
+}
+
+bool ChessBoard::findOverlaps(CursorLoc& KingLoc, ThreatLoc &threatPiece){
+	int8_t deltaY = KingLoc.h - threatPiece.h;
+    int8_t deltaX = KingLoc.w - threatPiece.w;
+    int8_t stepY = (deltaY > 0) ? 1 : (deltaY < 0) ? -1 : 0;
+    int8_t stepX = (deltaX > 0) ? 1 : (deltaX < 0) ? -1 : 0;
+
+	bool colour = board[KingLoc.h][KingLoc.w]->pieceColour != BLUE;
+	if(!threatPiece.horsePiece)
+		for (int8_t h = threatPiece.h + stepY, w = threatPiece.w + stepX; h != KingLoc.h || w != KingLoc.w; h += stepY, w += stepX) {
+			if ((board[h][w]->threat[0] && board[h][w]->threat[1]) || (colour && board[h][w]->threat[!colour] && board[h][w]->threatensKing) ||
+					(!colour && board[h][w]->threat[colour] && board[h][w]->threatensKing)) {
+				return true;
+			}
+		}
+	else {
+		if(board[threatPiece.h][threatPiece.w]->threat[!colour] && board[threatPiece.h][threatPiece.w]->threatensKing) return true;
+	}
+    return false;
 }
 
 ChessBoard::ChessBoard() {
@@ -364,7 +452,6 @@ void ChessBoard::FillRow(int row, uint8_t& unit_colour, std::vector<std::unique_
 		default:
 			for(int i = 0; i < BOARD_SIZE; i++){
 				Board[i] = std::make_unique<emptyPiece>(board);
-				Board[i]->pieceColour = 0;
 			}
 			break;
 	}
@@ -376,13 +463,16 @@ void ChessBoard::updateThreatSquares(bool reset) {
 			for(uint8_t j = 0; j < BOARD_SIZE; j++){
 				board[i][j]->threat[0] = false;
 				board[i][j]->threat[1] = false;
+				board[i][j]->threatensKing = false;
 			}
 		}
+		threatPath.clear();
 	}
+
     for (uint8_t i = 0; i < BOARD_SIZE; i++){
 		for(uint8_t j = 0; j < BOARD_SIZE; j++){
 			if(board[i][j]->chessChar != ' '){
-				board[i][j]->checkSquares(i,j);
+				board[i][j]->checkSquares(i,j, threatPath);
 				if(board[i][j]->chessChar == 'K') {
 				bool colour = board[i][j]->pieceColour != BLUE;
 				KingLoc[colour] = {(int8_t)i,(int8_t)j};

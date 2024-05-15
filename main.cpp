@@ -29,7 +29,7 @@ int main(){
 					}
 				}
 				else {
-					if((retVal = chessBoard.movePiece(cursorL[1],cursorL[0])) == 0) {
+					if((retVal = chessBoard.movePiece(cursorL[1],cursorL[0], playerTurn)) == 0) {
 						playerTurn = !playerTurn;
 						SelectState++;
 					}
