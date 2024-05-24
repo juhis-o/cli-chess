@@ -1,20 +1,12 @@
 #ifndef CHESS_H
 #define CHESS_H
-#include "kirous.h"
+#include "shared.h"
 #include <stdlib.h>
 #include <cstring>
-#include <cstdint>
 #include <vector>
 #include <memory>
+#include <fstream>
 
-#define RED 1
-#define BLUE 3
-#define BOARD_SIZE 8
-
-struct ThreatLoc {
-    int8_t h = 0, w = 0;
-    bool horsePiece = false;
-}__attribute__((packed));
 
 class chessPiece {
     protected:
@@ -29,8 +21,8 @@ class chessPiece {
         virtual void checkSquares(int h, int w, std::vector<ThreatLoc>& loc) = 0;
         char chessChar = ' '; //Chess piece
         uint8_t pieceColour; //Player colour
-        bool threat[2]{false,false};
-        bool threatensKing = false;
+        uint8_t piecePath[2]{false,false};
+        bool pawnPath[2]{false,false};
         virtual ~chessPiece() = default;
 };
 
@@ -108,20 +100,25 @@ class ChessBoard {
         bool findOverlaps(CursorLoc& KingLoc, ThreatLoc &threatPiece);
         CursorLoc KingLoc[2] = {0};
         std::vector<std::vector<std::unique_ptr<chessPiece>>> board;
+        std::vector<ThreatLoc> threatPath;
         enum rows{BACKROW,FRONTROW,EMPTYROW};
+        std::ofstream file;
     public:
         ChessBoard();
         int getPieceColour(int iter1, int iter2){return board[iter1][iter2]->pieceColour;};
         int getPieceChar(int iter1, int iter2){return board[iter1][iter2]->chessChar;};
-        bool* getSquareThreat(int iter1, int iter2){return board[iter1][iter2]->threat;};
-        bool getKingThreat(int iter1, int iter2){return board[iter1][iter2]->threatensKing;};
-        bool checkmate(CursorLoc& KingLoc);
-        std::vector<ThreatLoc> threatPath;
+        uint8_t* getSquareThreat(int iter1, int iter2){return board[iter1][iter2]->piecePath;};
+        bool* getPawnPath(int iter1, int iter2){return board[iter1][iter2]->pawnPath;};
+//        bool* getKingThreat(int iter1, int iter2){return board[iter1][iter2]->threatensKing;};
+        int8_t checkmate(bool playerTurn);
         CursorLoc* getKingPos(){return KingLoc;};
-        int movePiece(CursorLoc &newLoc, CursorLoc &oldLoc, bool turn){
+        int movePiece(CursorLoc &newLoc, CursorLoc &oldLoc){
             int ret = board[oldLoc.h][oldLoc.w]->move(newLoc,oldLoc);
             updateThreatSquares(true);
-            return checkmate(KingLoc[!turn]);
+            return ret;
+        };
+        ~ChessBoard() {
+            file.close();
         };
 };
 

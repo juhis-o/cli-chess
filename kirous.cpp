@@ -19,25 +19,25 @@ chessUI::chessUI() {
     keypad(stdscr, TRUE);
 }
 
-void chessUI::updateInterface(ChessBoard &cBoard, int ret, char* debug) {
+void chessUI::updateInterface(ChessBoard &cBoard, int ret, int8_t checkmate) {
 	clear();
 	bool bg = 1;
 	for (int i = 0; i < BOARD_SIZE ; i++){
 		for (int j = 0; j < BOARD_SIZE; j++){
 			char c = cBoard.getPieceChar(i,j);
 			#ifdef ThreatDebug
-			bool *threat = cBoard.getSquareThreat(i,j);
-			bool kThreat = cBoard.getKingThreat(i,j);
+			uint8_t *threat = cBoard.getSquareThreat(i,j);
+//			bool *threat = cBoard.getPawnPath(i,j);
+//			bool kThreat = cBoard.getKingThreat(i,j);
 			#endif
 			
 			if(c != ' '){
 				#ifdef ThreatDebug
-				
-				if(threat[0] && !threat[1]) attron(COLOR_PAIR(TEXT_COLOUR));
-				else if(!threat[0] && threat[1])attron(COLOR_PAIR(TEMP1));
-				else if(threat[0] && threat[1]) attron(COLOR_PAIR(TEMP2));
-				
-				//if(kThreat) attron(COLOR_PAIR(TEMP4));
+				if(threat[0] == 1 && threat[1] == 0) attron(COLOR_PAIR(TEXT_COLOUR));
+				else if(threat[0] == 0 && threat[1] == 1)attron(COLOR_PAIR(TEMP1));
+				else if(threat[0] == 1 && threat[1] == 1) attron(COLOR_PAIR(TEMP2));
+				else if(threat[0] == 2 || threat[1] == 2) attron(COLOR_PAIR(TEMP3));
+				//if(kThreat) attron(COLOR_PAIR(TEXT_COLOUR));
 				else attron(COLOR_PAIR(bg+cBoard.getPieceColour(i,j)));
 				#endif
 				#ifndef ThreatDebug
@@ -47,12 +47,11 @@ void chessUI::updateInterface(ChessBoard &cBoard, int ret, char* debug) {
 			}
 			else {
 				#ifdef ThreatDebug
-				
-				if(threat[0] && !threat[1]) attron(COLOR_PAIR(TEXT_COLOUR));
-				else if(!threat[0] && threat[1])attron(COLOR_PAIR(TEMP1));
-				else if(threat[0] && threat[1]) attron(COLOR_PAIR(TEMP2));
-				
-				//if(kThreat) attron(COLOR_PAIR(TEMP4));
+				if(threat[0] == 1 && threat[1] == 0) attron(COLOR_PAIR(TEXT_COLOUR));
+				else if(threat[0] == 0 && threat[1] == 1)attron(COLOR_PAIR(TEMP1));
+				else if(threat[0] == 1 && threat[1] == 1) attron(COLOR_PAIR(TEMP2));
+				else if(threat[0] == 2 || threat[1] == 2) attron(COLOR_PAIR(TEMP3));
+				//if(kThreat) attron(COLOR_PAIR(TEXT_COLOUR));
 				else attron(COLOR_PAIR(bg+RED_ON_WHITE)); //Switches between black and white squares with bg
 				#endif
 				#ifndef ThreatDebug
@@ -68,7 +67,18 @@ void chessUI::updateInterface(ChessBoard &cBoard, int ret, char* debug) {
 	attron(COLOR_PAIR(TEXT_COLOUR));
 	if(!Init){getyx(stdscr,currentLoc.h,currentLoc.w);Init = true;}
 	else {
-	printw("Return code: %d; %s", ret,debug);
+	if(checkmate == 1) {
+		printw("Checkmate! Press Q to quit");
+		gameover = true;
+	}
+	else if(checkmate == -1) {
+		printw("King is being threatened! Find way to stop threat");
+	}
+	else if(checkmate == -2) {
+		printw("Player has failed to protect the king");
+		gameover = true;
+	}
+//	printw("Return code: %d; %d", ret, checkmate);
 	}
 	move(currentLoc.h, currentLoc.w);
 	refresh();
@@ -76,16 +86,18 @@ void chessUI::updateInterface(ChessBoard &cBoard, int ret, char* debug) {
 
 
 int chessUI::Select(CursorLoc& loc){
-	int a = false;
-	while(!a){
+	int ret = false;
+	while(!ret){
 		ch = getch();
 		switch (ch) {
 			case 10: //Enter key
-				loc = currentLoc;
-				a = true;
+				if(!gameover) {
+					loc = currentLoc;
+					ret = true;
+				}
 				break;
 			case 'q':
-				a = -6;
+				ret = -6;
 				break;
 			case KEY_DOWN:
 				currentLoc.h++;
@@ -103,7 +115,7 @@ int chessUI::Select(CursorLoc& loc){
 		move(currentLoc.h, currentLoc.w);
 		refresh();
 	}
-	return a;
+	return ret;
 }
 
 chessUI::~chessUI() {

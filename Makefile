@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -std=c++14 -Wall
+CFLAGS = -std=c++20 -Wall
 LIBS = -lncurses
 
 SRCS = main.cpp chess.cpp kirous.cpp
