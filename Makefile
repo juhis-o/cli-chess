@@ -6,6 +6,11 @@ SRCS = main.cpp chess.cpp kirous.cpp
 OBJS = $(SRCS:.cpp=.o)
 TARGET = a.out
 
+# Check if DEBUG is set to 1 and add the -DThreatDebug flag
+ifdef DEBUG
+CFLAGS += -DThreatDebug
+endif
+
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
@@ -15,4 +20,4 @@ $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -f $(OBJS) $(TARGET) output.txt

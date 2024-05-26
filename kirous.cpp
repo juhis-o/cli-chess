@@ -19,7 +19,7 @@ chessUI::chessUI() {
     keypad(stdscr, TRUE);
 }
 
-void chessUI::updateInterface(ChessBoard &cBoard, int ret, int8_t checkmate) {
+void chessUI::updateInterface(ChessBoard &cBoard, int ret, int8_t checkmate, bool select) {
 	clear();
 	bool bg = 1;
 	for (int i = 0; i < BOARD_SIZE ; i++){
@@ -67,18 +67,44 @@ void chessUI::updateInterface(ChessBoard &cBoard, int ret, int8_t checkmate) {
 	attron(COLOR_PAIR(TEXT_COLOUR));
 	if(!Init){getyx(stdscr,currentLoc.h,currentLoc.w);Init = true;}
 	else {
-	if(checkmate == 1) {
-		printw("Checkmate! Press Q to quit");
-		gameover = true;
-	}
-	else if(checkmate == -1) {
-		printw("King is being threatened! Find way to stop threat");
-	}
-	else if(checkmate == -2) {
-		printw("Player has failed to protect the king");
-		gameover = true;
-	}
+	if(!select) {
+		switch(ret) {
+			case 0:
+				printw("Move ok");
+				break;
+			case -1:
+				printw("Move not valid");
+				break;
+			case -2:
+				printw("Cant capture own piece");
+				break;
+			case -3:
+				printw("Piece is obstructing path to target location");
+				break;
+			case -4:
+				printw("Move cancelled");
+				break;
+			case -5:
+				printw("King cannot move location which is being threatened by opposite side.");
+				break;
+		}
+
+		if(checkmate == 1) {
+			printw("\nCheckmate! Press Q to quit");
+			gameover = true;
+		}
+		else if(checkmate == -1) {
+			printw("\nKing is being threatened! Find way to stop threat");
+		}
+		else if(checkmate == -2) {
+			printw("\nPlayer has failed to protect the king");
+			gameover = true;
+		}
 //	printw("Return code: %d; %d", ret, checkmate);
+	}
+	else {
+		printw("%s Player has selected %c piece", (BLUE == cBoard.getPieceColour(currentLoc.h,currentLoc.w)) ? "BLUE" : "RED", cBoard.getPieceChar(currentLoc.h,currentLoc.w));
+	}
 	}
 	move(currentLoc.h, currentLoc.w);
 	refresh();
@@ -90,25 +116,25 @@ int chessUI::Select(CursorLoc& loc){
 	while(!ret){
 		ch = getch();
 		switch (ch) {
-			case 10: //Enter key
+			case 'e': case 10: //Enter key
 				if(!gameover) {
 					loc = currentLoc;
 					ret = true;
 				}
 				break;
-			case 'q':
+			case 'q': case 27: //Escape key
 				ret = -6;
 				break;
-			case KEY_DOWN:
+			case KEY_DOWN: case 's':
 				currentLoc.h++;
 				break;
-			case KEY_UP:
+			case KEY_UP: case 'w':
 				currentLoc.h--;
 				break;
-			case KEY_LEFT:
+			case KEY_LEFT: case 'a':
 				currentLoc.w--;
 				break;
-			case KEY_RIGHT:
+			case KEY_RIGHT: case 'd':
 				currentLoc.w++;
 				break;
 		}

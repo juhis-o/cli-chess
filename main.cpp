@@ -5,18 +5,19 @@
 
 int main(){
 	int retVal = 0;
+	int color = 0;
+	int8_t gameState = false;
+	char c = 0;
 	bool playerTurn = 1;
+	bool KingThreat = false;
 	CursorLoc cursorL[2];
+	CursorLoc selectedPiece;
 	ChessBoard chessBoard;
 	chessUI userI;
-	int8_t gameState = false;
-	bool KingThreat = false;
-	char c = 0;
-	int color = 0;
 
 	while(retVal != -6) {
 		for(int SelectState = 0; SelectState < 2;){
-			userI.updateInterface(chessBoard, retVal, gameState);
+			userI.updateInterface(chessBoard, retVal, gameState, SelectState);
 			if((retVal = userI.Select(cursorL[SelectState])) == -6) break; 
 			if (cursorL[SelectState].h >= 0 && cursorL[SelectState].h < BOARD_SIZE && cursorL[SelectState].w >= 0 && cursorL[SelectState].w < BOARD_SIZE) {
 				if(!SelectState) {
@@ -34,7 +35,6 @@ int main(){
 							else KingThreat = false;
 						}
 					}
-
 					else SelectState--;
 				}
 			}

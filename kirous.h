@@ -5,7 +5,7 @@
 #ifndef KIROUS_H
 #define KIROUS_H
 
-#define ThreatDebug
+//#define ThreatDebug
 
 class ChessBoard;
 
@@ -20,7 +20,7 @@ class chessUI {
         chessUI();
         ~chessUI();
         int Select(CursorLoc& loc);
-        void updateInterface(ChessBoard &cBoard, int ret, int8_t checkmate);
+        void updateInterface(ChessBoard &cBoard, int ret, int8_t checkmate, bool select);
 };
 
 #endif
