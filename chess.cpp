@@ -26,9 +26,10 @@ bool chessPiece::calcPath(CursorLoc &newLoc, CursorLoc &oldLoc){
 void pawnPiece::checkSquares(int h, int w, std::vector<ThreatLoc>& loc){
 	bool colour = pieceColour != BLUE;
 	int8_t dirH = colour ? 1 : -1;
-
+	
 	for(int i = dirH, target = firstMove+abs(dirH)+1; abs(i) < target; i+=dirH){
-		if(board[h+i][w]->chessChar == ' ') board[h+i][w]->pawnPath[colour] = true;
+		if(h + i < 0 || h + i >= 8) break;
+		if((board[h+i][w]->chessChar == ' ') && (h + i >= 0 || h + i < 8)) board[h+i][w]->pawnPath[colour] = true;
 		else break;
 	}
 
@@ -51,34 +52,31 @@ int pawnPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 	int ret = MOVE_OK;
 	bool direction = pieceColour != BLUE;
 
-	if(memcmp(&newLoc,&oldLoc,sizeof(newLoc)) == 0) return -MOVE_CANCEL;
+	if(memcmp(&newLoc,&oldLoc,sizeof(newLoc)) == 0) return MOVE_CANCEL;
 
-	if (((direction && movementY > 0) || (!direction && movementY < 0)) && (movementX == 0)) {
-		if(firstMove){
-			if(abs(movementY) <= 2 && (calcPath(newLoc,oldLoc))) {
+	if(((direction && movementY > 0) || (!direction && movementY < 0)) && (movementX == 0)) {
+		if(calcPath(newLoc,oldLoc) && board[newLoc.h][newLoc.w]->chessChar == ' ') {
+			if(abs(movementY) <= 1 + firstMove) {
 				firstMove = false;
 				moveEmptySpace(newLoc, oldLoc);
+				if((!direction && newLoc.h == 0) || (direction && newLoc.h == 7)) ret = PAWN_PROMOTION;
 			}
-			else ret = -MOVE_NOT_VALID;
+			else ret = MOVE_NOT_VALID;
 		}
-		else {
-			if(abs(movementY) == 1 && (board[newLoc.h][newLoc.w]->chessChar == ' ')) {
-				moveEmptySpace(newLoc, oldLoc);
-			}
-			else ret = -MOVE_NOT_VALID;
-		}
+		else ret = PIECE_ON_PATH;
 	}
-	else if (((direction && movementY > 0) ||
-	(!direction && movementY < 0)) &&
+	else if (((direction && movementY > 0) || (!direction && movementY < 0)) &&
 	(abs(movementX) == 1 && abs(movementY) == 1) && 
 	(board[newLoc.h][newLoc.w]->chessChar != ' ')){
         if ((direction && board[newLoc.h][newLoc.w]->pieceColour == BLUE) ||
             (!direction && board[newLoc.h][newLoc.w]->pieceColour == RED)) {
 				moveOccupiedSpace(newLoc, oldLoc);
+				if((!direction && newLoc.h == 0) || (direction && newLoc.h == 7)) ret = PAWN_PROMOTION;
 			}
-		else ret = -MOVE_NOT_VALID;
+		else ret = CAPTURING_OWN_PIECE;
 	}
-	else ret = -MOVE_NOT_VALID;
+	else ret = MOVE_NOT_VALID;
+
 	return ret;
 }
 
@@ -120,7 +118,7 @@ int towerPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 	bool colour = pieceColour != BLUE;
 	int ret = MOVE_OK;
 
-	if(memcmp(&newLoc,&oldLoc,sizeof(newLoc)) == 0) return -MOVE_CANCEL;
+	if(memcmp(&newLoc,&oldLoc,sizeof(newLoc)) == 0) return MOVE_CANCEL;
 
 	if((newLoc.h == oldLoc.h) || (newLoc.w == oldLoc.w)){
 		if(calcPath(newLoc,oldLoc)) {
@@ -132,12 +130,12 @@ int towerPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
                 (!colour && board[newLoc.h][newLoc.w]->pieceColour == RED)) {
 				moveOccupiedSpace(newLoc, oldLoc);
 				}
-				else ret = -CAPTURING_OWN_PIECE;
+				else ret = CAPTURING_OWN_PIECE;
 			}
 		}
-		else ret = -PIECE_ON_PATH;
+		else ret = PIECE_ON_PATH;
 	}
-	else ret = -MOVE_NOT_VALID;
+	else ret = MOVE_NOT_VALID;
 	return ret;
 }
 
@@ -180,7 +178,7 @@ int bishopPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 	bool colour = pieceColour != BLUE;
 	int ret = MOVE_OK;
 
-	if(memcmp(&newLoc,&oldLoc,sizeof(newLoc)) == 0) return -MOVE_CANCEL;
+	if(memcmp(&newLoc,&oldLoc,sizeof(newLoc)) == 0) return MOVE_CANCEL;
 
 	if(abs(movementX) == abs(movementY)) {
 		if(calcPath(newLoc,oldLoc)) {
@@ -192,12 +190,12 @@ int bishopPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
                 (!colour && board[newLoc.h][newLoc.w]->pieceColour == RED)) {
 				moveOccupiedSpace(newLoc, oldLoc);
 				}
-				else ret = -CAPTURING_OWN_PIECE;
+				else ret = CAPTURING_OWN_PIECE;
 			}
 		}
-		else ret = -PIECE_ON_PATH;
+		else ret = PIECE_ON_PATH;
 	}
-	else ret = -MOVE_NOT_VALID;
+	else ret = MOVE_NOT_VALID;
 
 	return ret;
 }
@@ -228,7 +226,7 @@ int horsePiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 	bool colour = pieceColour != BLUE;
 	int ret = MOVE_OK;
 
-	if(memcmp(&newLoc,&oldLoc,sizeof(newLoc)) == 0) return -MOVE_CANCEL;
+	if(memcmp(&newLoc,&oldLoc,sizeof(newLoc)) == 0) return MOVE_CANCEL;
 
 	if((abs(movementX) == 1 && abs(movementY) == 2) || (abs(movementX) == 2 && abs(movementY) == 1)){
 		if(board[newLoc.h][newLoc.w]->chessChar == ' '){
@@ -239,10 +237,10 @@ int horsePiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
                 (!colour && board[newLoc.h][newLoc.w]->pieceColour == RED)) {
 				moveOccupiedSpace(newLoc, oldLoc);
 				}
-			else ret = -CAPTURING_OWN_PIECE;
+			else ret = CAPTURING_OWN_PIECE;
 		}
 	}
-	else ret = -MOVE_NOT_VALID;
+	else ret = MOVE_NOT_VALID;
 	return ret;
 }
 
@@ -294,7 +292,7 @@ int queenPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 	bool colour = pieceColour != BLUE;
 	int ret = MOVE_OK;
 
-	if(memcmp(&newLoc,&oldLoc,sizeof(newLoc)) == 0) return -MOVE_CANCEL;
+	if(memcmp(&newLoc,&oldLoc,sizeof(newLoc)) == 0) return MOVE_CANCEL;
 
 	if((abs(movementX) == abs(movementY)) || ((newLoc.h == oldLoc.h) || (newLoc.w == oldLoc.w))) {
 		if(calcPath(newLoc,oldLoc)) {
@@ -306,12 +304,12 @@ int queenPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
                 (!colour && board[newLoc.h][newLoc.w]->pieceColour == RED)) {
 				moveOccupiedSpace(newLoc, oldLoc);
 				}
-				else ret = -CAPTURING_OWN_PIECE;
+				else ret = CAPTURING_OWN_PIECE;
 			}
 		}
-		else ret = -PIECE_ON_PATH;
+		else ret = PIECE_ON_PATH;
 	}
-	else ret = -MOVE_NOT_VALID;
+	else ret = MOVE_NOT_VALID;
 
 	return ret;
 }
@@ -336,23 +334,23 @@ int kingPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 	bool colour = pieceColour != BLUE;
 	int ret = MOVE_OK;
 
-	if(memcmp(&newLoc,&oldLoc,sizeof(newLoc)) == 0) return -MOVE_CANCEL;
+	if(memcmp(&newLoc,&oldLoc,sizeof(newLoc)) == 0) return MOVE_CANCEL;
 	
-	if(abs(movementX) == 1 || abs(movementY) == 1) {
+	if(abs(movementX) <= 1 && abs(movementY) <= 1) {
 		if(board[newLoc.h][newLoc.w]->chessChar == ' '){
 			if(!board[newLoc.h][newLoc.w]->piecePath[!colour]) moveEmptySpace(newLoc, oldLoc);
-			else ret = -THREAT;
+			else ret = THREAT;
 		}
 		else {
             if ((colour && board[newLoc.h][newLoc.w]->pieceColour == BLUE) ||
                 (!colour && board[newLoc.h][newLoc.w]->pieceColour == RED)) {
 				if(!board[newLoc.h][newLoc.w]->piecePath[!colour]) moveOccupiedSpace(newLoc, oldLoc);
-				else ret = -THREAT;
+				else ret = THREAT;
 			}
-			else ret = -CAPTURING_OWN_PIECE;
+			else ret = CAPTURING_OWN_PIECE;
 		}
 	}
-	else ret = -MOVE_NOT_VALID;
+	else ret = MOVE_NOT_VALID;
 
 	return ret;
 }
@@ -457,6 +455,27 @@ ChessBoard::ChessBoard() {
 		if(i == 1) unit_colour+=2;
 	}
 	updateThreatSquares(false);
+}
+
+int ChessBoard::setPiece(CursorLoc loc, char piece, bool color){
+	uint8_t pColour = (color) ? BLUE : RED;
+	switch(piece) {
+		case 'B':
+			board[loc.h][loc.w] = std::make_unique<bishopPiece>(board);
+			break;
+		case 'H':
+			board[loc.h][loc.w] = std::make_unique<horsePiece>(board);
+			break;
+		case 'Q':
+			board[loc.h][loc.w] = std::make_unique<queenPiece>(board);
+			break;
+		case 'T':
+			board[loc.h][loc.w] = std::make_unique<towerPiece>(board);
+			break;
+	}
+	board[loc.h][loc.w]->pieceColour = pColour;
+	updateThreatSquares(true);
+	return 2;
 }
 
 void ChessBoard::FillRow(int row, uint8_t& unit_colour, std::vector<std::unique_ptr<chessPiece>>&Board) {

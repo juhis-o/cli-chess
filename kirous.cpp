@@ -69,36 +69,49 @@ void chessUI::updateInterface(ChessBoard &cBoard, int ret, int8_t checkmate, boo
 	else {
 	if(!select) {
 		switch(ret) {
-			case 0:
-				printw("Move ok");
-				break;
-			case -1:
-				printw("Move not valid");
-				break;
-			case -2:
-				printw("Cant capture own piece");
-				break;
-			case -3:
-				printw("Piece is obstructing path to target location");
-				break;
-			case -4:
-				printw("Move cancelled");
-				break;
 			case -5:
 				printw("King cannot move location which is being threatened by opposite side.");
 				break;
+			case -4:
+				printw("Move not valid.");
+				break;
+			case -3:
+				printw("Cant capture own piece.");
+				break;
+			case -2:
+				printw("Piece is obstructing path to target location.");
+				break;
+			case -1:
+				printw("Move cancelled.");
+				break;
+			case 0:
+				printw("Move ok.");
+				break;
+			case 1:
+				printw("Pawn promotion.");
+				break;
+			case 2:
+				printw("Pawn has been promoted");
+				break;
+			case 10:
+				printw("Invalid selection.");
+				break;
+			default:
+				printw("Unknown return message.");
+				break;
 		}
-
-		if(checkmate == 1) {
-			printw("\nCheckmate! Press Q to quit");
-			gameover = true;
-		}
-		else if(checkmate == -1) {
-			printw("\nKing is being threatened! Find way to stop threat");
-		}
-		else if(checkmate == -2) {
-			printw("\nPlayer has failed to protect the king");
-			gameover = true;
+		switch(checkmate) {
+			case -2:
+				printw("\nPlayer has failed to protect the king");
+				gameover = true;
+				break;
+			case -1:
+				printw("\nKing is being threatened! Find way to stop threat");
+				break;
+			case 1:
+				printw("\nCheckmate! Press Q to quit");
+				gameover = true;
+				break;
 		}
 //	printw("Return code: %d; %d", ret, checkmate);
 	}
@@ -110,20 +123,48 @@ void chessUI::updateInterface(ChessBoard &cBoard, int ret, int8_t checkmate, boo
 	refresh();
 }
 
+char chessUI::promotionSelect(){
+	bool selectionMade = false;
+	char selection[] = {'T', 'B', 'H', 'Q'};
+	move(9, 0);
+	printw("%s",selection);
+	move(9, 0);
+	getyx(stdscr,currentLoc.h,currentLoc.w);
+	while(!selectionMade){
+		ch = getch();
+		switch (ch) {
+			case 'e': case 10: //Enter key
+				selectionMade = true;
+				break;
+			case KEY_LEFT: case 'a':
+				if(currentLoc.w > 0) currentLoc.w--;
+				break;
+			case KEY_RIGHT: case 'd':
+				if(currentLoc.w < 3) currentLoc.w++;
+				break;
+		}
+		move(currentLoc.h, currentLoc.w);
+		refresh();
+	}
+	return selection[currentLoc.w];
+}
+
 
 int chessUI::Select(CursorLoc& loc){
-	int ret = false;
-	while(!ret){
+	int ret = 10;
+	bool selectionMade = false;
+	while(!selectionMade){
 		ch = getch();
 		switch (ch) {
 			case 'e': case 10: //Enter key
 				if(!gameover) {
 					loc = currentLoc;
-					ret = true;
+					selectionMade = true;
 				}
 				break;
 			case 'q': case 27: //Escape key
 				ret = -6;
+				selectionMade = true;
 				break;
 			case KEY_DOWN: case 's':
 				currentLoc.h++;

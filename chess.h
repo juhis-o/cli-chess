@@ -14,7 +14,7 @@ class chessPiece {
         void moveEmptySpace(CursorLoc &newLoc, CursorLoc &oldLoc);
         void moveOccupiedSpace(CursorLoc &newLoc, CursorLoc &oldLoc);
         bool calcPath(CursorLoc &newLoc, CursorLoc &oldLoc);
-        enum errList : uint8_t {MOVE_OK,MOVE_NOT_VALID,CAPTURING_OWN_PIECE,PIECE_ON_PATH,MOVE_CANCEL,THREAT};
+        enum errList : int8_t {THREAT = -5, MOVE_NOT_VALID,CAPTURING_OWN_PIECE,PIECE_ON_PATH,MOVE_CANCEL,MOVE_OK,PAWN_PROMOTION};
     public:
         chessPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef) : board(boardRef) {}
         virtual int move(CursorLoc &newLoc, CursorLoc &oldLoc) = 0;
@@ -107,6 +107,7 @@ class ChessBoard {
         ChessBoard();
         int getPieceColour(int iter1, int iter2){return board[iter1][iter2]->pieceColour;};
         int getPieceChar(int iter1, int iter2){return board[iter1][iter2]->chessChar;};
+        int setPiece(CursorLoc loc, char piece, bool color);
         uint8_t* getSquareThreat(int iter1, int iter2){return board[iter1][iter2]->piecePath;};
         bool* getPawnPath(int iter1, int iter2){return board[iter1][iter2]->pawnPath;};
 //        bool* getKingThreat(int iter1, int iter2){return board[iter1][iter2]->threatensKing;};

@@ -17,7 +17,14 @@ int main(){
 
 	while(retVal != -6) {
 		for(int SelectState = 0; SelectState < 2;){
+		update:
 			userI.updateInterface(chessBoard, retVal, gameState, SelectState);
+			if(retVal == 1) {
+				c = userI.promotionSelect();
+				retVal = chessBoard.setPiece(selectedPiece,c,!playerTurn);
+				gameState = chessBoard.checkmate(!playerTurn);
+				goto update;
+			}
 			if((retVal = userI.Select(cursorL[SelectState])) == -6) break; 
 			if (cursorL[SelectState].h >= 0 && cursorL[SelectState].h < BOARD_SIZE && cursorL[SelectState].w >= 0 && cursorL[SelectState].w < BOARD_SIZE) {
 				if(!SelectState) {
@@ -28,12 +35,13 @@ int main(){
 						SelectState++;
 				}
 				else {
-					if((retVal = chessBoard.movePiece(cursorL[1],cursorL[0])) == 0) {
+					if((retVal = chessBoard.movePiece(cursorL[1],cursorL[0])) > -1) {
 						SelectState++;
 						if(KingThreat) {
 							if(chessBoard.checkmate(!playerTurn) == -1) gameState = -2;
 							else KingThreat = false;
 						}
+						if(retVal == 1) selectedPiece = cursorL[1];
 					}
 					else SelectState--;
 				}

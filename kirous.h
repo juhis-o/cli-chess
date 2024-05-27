@@ -20,6 +20,7 @@ class chessUI {
         chessUI();
         ~chessUI();
         int Select(CursorLoc& loc);
+        char promotionSelect();
         void updateInterface(ChessBoard &cBoard, int ret, int8_t checkmate, bool select);
 };
 

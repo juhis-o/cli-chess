@@ -3,3 +3,4 @@ a.out
 .vscode/
 *.json
 *.o
+output.txt
