@@ -1,0 +1,28 @@
+# nmake makefile
+
+# Compiler and flags
+CC = cl
+CFLAGS = /std:c++20 /Wall /I C:\PDCurses-3.9
+LIBS = pdcurses.lib
+
+# Source and object files
+SRCS = main.cpp chess.cpp kirous.cpp
+OBJS = main.obj chess.obj kirous.obj
+TARGET = cli-chess.exe
+
+# Check if DEBUG is set to 1 and add the -DThreatDebug flag
+!IF "$(DEBUG)" == "1"
+CFLAGS = $(CFLAGS) /DThreatDebug
+!ENDIF
+
+all: $(TARGET)
+
+$(TARGET): $(OBJS)
+    $(CC) $(CFLAGS) /Fe$(TARGET) $(OBJS) $(LIBS)
+
+# Rule to compile .cpp files to .obj
+.cpp.obj:
+    $(CC) $(CFLAGS) /c $<
+
+clean:
+    -del $(OBJS) $(TARGET)

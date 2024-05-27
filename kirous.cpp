@@ -65,39 +65,44 @@ void chessUI::updateInterface(ChessBoard &cBoard, int ret, int8_t checkmate, boo
 		addch('\n');
 	}
 	attron(COLOR_PAIR(TEXT_COLOUR));
-	if(!Init){getyx(stdscr,currentLoc.h,currentLoc.w);Init = true;}
+	if(!Init){
+		printw("Welcome to cli-chess! Cursor can be moved with WASD or Arrow keys.\nChesspiece can be selected using E or Enter key.\nQuit from game using Q or ESC keys.");
+		Init = true;
+		move(5,4);
+		getyx(stdscr,currentLoc.h,currentLoc.w);
+	}
 	else {
 	if(!select) {
 		switch(ret) {
 			case -5:
-				printw("King cannot move location which is being threatened by opposite side.");
+				printw("King cannot move location which is being threatened by opposite side");
 				break;
 			case -4:
-				printw("Move not valid.");
+				printw("Move not valid");
 				break;
 			case -3:
-				printw("Cant capture own piece.");
+				printw("Cant capture own piece");
 				break;
 			case -2:
-				printw("Piece is obstructing path to target location.");
+				printw("Piece is obstructing path to target location");
 				break;
 			case -1:
-				printw("Move cancelled.");
+				printw("Move cancelled");
 				break;
 			case 0:
-				printw("Move ok.");
+				printw("Move ok");
 				break;
 			case 1:
-				printw("Pawn promotion.");
+				printw("Pawn promotion");
 				break;
 			case 2:
 				printw("Pawn has been promoted");
 				break;
 			case 10:
-				printw("Invalid selection.");
+				printw("Invalid selection");
 				break;
 			default:
-				printw("Unknown return message.");
+				printw("Unknown return message");
 				break;
 		}
 		switch(checkmate) {
@@ -125,7 +130,9 @@ void chessUI::updateInterface(ChessBoard &cBoard, int ret, int8_t checkmate, boo
 
 char chessUI::promotionSelect(){
 	bool selectionMade = false;
-	char selection[] = {'T', 'B', 'H', 'Q'};
+	int i = 0;
+	char selection[] = {'T', 'B', 'H', 'Q', '\0'};
+	getyx(stdscr,selectedLoc.h,selectedLoc.w);
 	move(9, 0);
 	printw("%s",selection);
 	move(9, 0);
@@ -135,6 +142,7 @@ char chessUI::promotionSelect(){
 		switch (ch) {
 			case 'e': case 10: //Enter key
 				selectionMade = true;
+				i = currentLoc.w;
 				break;
 			case KEY_LEFT: case 'a':
 				if(currentLoc.w > 0) currentLoc.w--;
@@ -146,7 +154,9 @@ char chessUI::promotionSelect(){
 		move(currentLoc.h, currentLoc.w);
 		refresh();
 	}
-	return selection[currentLoc.w];
+	move(selectedLoc.h, selectedLoc.w);
+	getyx(stdscr,currentLoc.h,currentLoc.w);
+	return selection[i];
 }
 
 
@@ -167,16 +177,16 @@ int chessUI::Select(CursorLoc& loc){
 				selectionMade = true;
 				break;
 			case KEY_DOWN: case 's':
-				currentLoc.h++;
+				if(currentLoc.h < 7) currentLoc.h++;
 				break;
 			case KEY_UP: case 'w':
-				currentLoc.h--;
+				if(currentLoc.h > 0) currentLoc.h--;
 				break;
 			case KEY_LEFT: case 'a':
-				currentLoc.w--;
+				if(currentLoc.w > 0) currentLoc.w--;
 				break;
 			case KEY_RIGHT: case 'd':
-				currentLoc.w++;
+				if(currentLoc.w < 7) currentLoc.w++;
 				break;
 		}
 		move(currentLoc.h, currentLoc.w);

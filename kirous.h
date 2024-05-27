@@ -1,11 +1,13 @@
+#ifdef _WIN32
+#include <curses.h>
+#else
 #include <ncurses.h>
+#endif
 #include "shared.h"
 #include "chess.h"
 
 #ifndef KIROUS_H
 #define KIROUS_H
-
-//#define ThreatDebug
 
 class ChessBoard;
 
