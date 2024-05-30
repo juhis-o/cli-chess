@@ -7,3 +7,4 @@ a.out
 *.txt
 *.lib
 *.dll
+*.exe
