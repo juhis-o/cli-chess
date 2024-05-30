@@ -355,15 +355,15 @@ int kingPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 	return ret;
 }
 
-int8_t ChessBoard::checkmate(bool playerTurn){
+enum CHECKMATE_STATE ChessBoard::checkmate(bool playerTurn){
 	bool colour = board[KingLoc[playerTurn].h][KingLoc[playerTurn].w]->pieceColour != BLUE;
-	int8_t ret = 0;
+	CHECKMATE_STATE ret = KING_SAFE;
 	if(!board[KingLoc[playerTurn].h][KingLoc[playerTurn].w]->piecePath[!colour]) return ret; //No piece is threatening king
-	else ret = -1;
+	else ret = KING_THREATENED;
 	if(canKingMove(KingLoc[playerTurn])) return ret; //King can move out of threat square
 	if(threatPath.empty()) {
 		file << "threat empty\n";
-		return false;
+		return ret;
 	}
 	else {
 		file << "items in threatpath vector\n";
@@ -372,7 +372,7 @@ int8_t ChessBoard::checkmate(bool playerTurn){
 		}
 	}
 
-	return true;
+	return CHECKMATE;
 }
 
 

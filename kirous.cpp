@@ -19,7 +19,7 @@ chessUI::chessUI() {
     keypad(stdscr, TRUE);
 }
 
-void chessUI::updateInterface(ChessBoard &cBoard, int ret, int8_t checkmate, bool select) {
+void chessUI::updateInterface(ChessBoard &cBoard, int ret, enum CHECKMATE_STATE check) {
 	clear();
 	bool bg = 1;
 	for (int i = 0; i < BOARD_SIZE ; i++){
@@ -66,66 +66,96 @@ void chessUI::updateInterface(ChessBoard &cBoard, int ret, int8_t checkmate, boo
 	}
 	attron(COLOR_PAIR(TEXT_COLOUR));
 	if(!Init){
-		printw("Welcome to cli-chess! Cursor can be moved with WASD or Arrow keys.\nChesspiece can be selected using E or Enter key.\nQuit from game using Q or ESC keys.");
+		printw("\nWelcome to cli-chess! Cursor can be moved with WASD or Arrow keys. Chesspiece can be selected using E or Enter key. Quit from game using Q or ESC keys.");
 		Init = true;
 		move(5,4);
 		getyx(stdscr,currentLoc.h,currentLoc.w);
 	}
+	
 	else {
-	if(!select) {
 		switch(ret) {
-			case -5:
-				printw("King cannot move location which is being threatened by opposite side");
-				break;
-			case -4:
-				printw("Move not valid");
-				break;
-			case -3:
-				printw("Cant capture own piece");
-				break;
-			case -2:
-				printw("Piece is obstructing path to target location");
-				break;
-			case -1:
-				printw("Move cancelled");
-				break;
-			case 0:
+			case MOVE_OK:
 				printw("Move ok");
 				break;
-			case 1:
+			case PAWN_PROMOTION:
 				printw("Pawn promotion");
 				break;
-			case 2:
+			case PAWN_PROMOTED:
 				printw("Pawn has been promoted");
 				break;
-			case 10:
-				printw("Invalid selection");
-				break;
 			default:
-				printw("Unknown return message");
+				printw("Unknown return message %d", ret);
 				break;
 		}
-		switch(checkmate) {
-			case -2:
+		
+		switch(check) {
+			case KING_THREATENED:
+				printw("\nKing is being threatened! Find way to stop threat");
+				break;
+			case KING_SAFE:
+				break;
+			case KING_PROTECT_FAIL:
 				printw("\nPlayer has failed to protect the king");
 				gameover = true;
 				break;
-			case -1:
-				printw("\nKing is being threatened! Find way to stop threat");
-				break;
-			case 1:
+			case CHECKMATE:
 				printw("\nCheckmate! Press Q to quit");
 				gameover = true;
 				break;
 		}
+		
 //	printw("Return code: %d; %d", ret, checkmate);
 	}
-	else {
-		printw("%s Player has selected %c piece", (BLUE == cBoard.getPieceColour(currentLoc.h,currentLoc.w)) ? "BLUE" : "RED", cBoard.getPieceChar(currentLoc.h,currentLoc.w));
-	}
+//	else {
+//		printw("%s Player has selected %c piece", (BLUE == cBoard.getPieceColour(currentLoc.h,currentLoc.w)) ? "BLUE" : "RED", cBoard.getPieceChar(currentLoc.h,currentLoc.w));
+//	}
+	move(currentLoc.h, currentLoc.w);
+	refresh();
+}
+
+void chessUI::printSelectState(ChessBoard & cBoard, int msg){
+	move(8, 0);
+	clrtoeol();
+	switch(msg) {
+		case INVALID_SELECT: //out of bounds, unselectable square
+			printw("Invalid selection");
+			break;
+		case THREAT:
+			printw("King cannot move location which is being threatened by opposite side");
+			break;
+		case MOVE_NOT_VALID:
+			printw("Move not valid");
+			break;
+		case CAPTURING_OWN_PIECE:
+			printw("Cant capture own piece");
+			break;
+		case PIECE_ON_PATH:
+			printw("Piece is obstructing path to target location");
+			break;
+		case MOVE_CANCEL:
+			printw("Move cancelled");
+			break;
+		case SELECT_OK:
+			printw("%s Player has selected %c piece", (BLUE == cBoard.getPieceColour(currentLoc.h,currentLoc.w)) ? "BLUE" : "RED", cBoard.getPieceChar(currentLoc.h,currentLoc.w));
+			break;
+		default:
+			printw("Unknown error %d", msg);
+			break;
 	}
 	move(currentLoc.h, currentLoc.w);
 	refresh();
+/*
+
+		case MOVE_OK:
+			printw("Move ok");
+			break;
+		case PAWN_PROMOTION:
+			printw("Pawn promotion");
+			break;
+		case PAWN_PROMOTED:
+			printw("Pawn has been promoted");
+			break;
+*/
 }
 
 char chessUI::promotionSelect(){
@@ -134,8 +164,7 @@ char chessUI::promotionSelect(){
 	char selection[] = {'T', 'B', 'H', 'Q', '\0'};
 	getyx(stdscr,selectedLoc.h,selectedLoc.w);
 	move(9, 0);
-	printw("%s",selection);
-	move(9, 0);
+	printw("%s\r",selection);
 	getyx(stdscr,currentLoc.h,currentLoc.w);
 	while(!selectionMade){
 		ch = getch();
@@ -160,8 +189,8 @@ char chessUI::promotionSelect(){
 }
 
 
-int chessUI::Select(CursorLoc& loc){
-	int ret = 10;
+bool chessUI::Select(CursorLoc& loc){
+	bool quit = false;
 	bool selectionMade = false;
 	while(!selectionMade){
 		ch = getch();
@@ -173,7 +202,7 @@ int chessUI::Select(CursorLoc& loc){
 				}
 				break;
 			case 'q': case 27: //Escape key
-				ret = -6;
+				quit = true;
 				selectionMade = true;
 				break;
 			case KEY_DOWN: case 's':
@@ -192,7 +221,7 @@ int chessUI::Select(CursorLoc& loc){
 		move(currentLoc.h, currentLoc.w);
 		refresh();
 	}
-	return ret;
+	return quit;
 }
 
 chessUI::~chessUI() {

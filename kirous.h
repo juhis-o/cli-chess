@@ -21,9 +21,10 @@ class chessUI {
     public:
         chessUI();
         ~chessUI();
-        int Select(CursorLoc& loc);
+        bool Select(CursorLoc& loc);
         char promotionSelect();
-        void updateInterface(ChessBoard &cBoard, int ret, int8_t checkmate, bool select);
+        void updateInterface(ChessBoard &cBoard, int ret, enum CHECKMATE_STATE check);
+        void printSelectState(ChessBoard &cBoard, int msg);
 };
 
 #endif

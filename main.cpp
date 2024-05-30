@@ -3,55 +3,59 @@
 #include "kirous.h"
 #include "shared.h"
 
+enum CHESS_STATES{SELECT,PROMOTE};
+enum SELECT_STATES{SELECT_PIECE, SELECT_LOCATION, END_SELECT};
+
 int main(){
-	int retVal = 0;
-	int color = 0;
-	int8_t gameState = false;
-	char c = 0;
-	bool playerTurn = 1;
-	bool KingThreat = false;
-	CursorLoc cursorL[2];
-	CursorLoc selectedPiece;
 	ChessBoard chessBoard;
 	chessUI userI;
+	CHECKMATE_STATE checkState = KING_SAFE;
+	CHESS_STATES gameState = SELECT;
+	int retVal = 0;
+	CursorLoc cursorL[2];
 
-	while(retVal != -6) {
-		for(int SelectState = 0; SelectState < 2;){
-		update:
-			userI.updateInterface(chessBoard, retVal, gameState, SelectState);
-			if(retVal == 1) {
-				c = userI.promotionSelect();
-				retVal = chessBoard.setPiece(selectedPiece,c,!playerTurn);
-				gameState = chessBoard.checkmate(!playerTurn);
-				goto update;
-			}
-			if((retVal = userI.Select(cursorL[SelectState])) == -6) break; 
-			if (cursorL[SelectState].h >= 0 && cursorL[SelectState].h < BOARD_SIZE && cursorL[SelectState].w >= 0 && cursorL[SelectState].w < BOARD_SIZE) {
-				if(!SelectState) {
-					c = chessBoard.getPieceChar(cursorL[0].h,cursorL[0].w);
-					color = chessBoard.getPieceColour(cursorL[0].h,cursorL[0].w);
-					if((c != ' ') && ((playerTurn && color == BLUE) || 
-			 		(!playerTurn && color == RED))) 
-						SelectState++;
-				}
-				else {
-					if((retVal = chessBoard.movePiece(cursorL[1],cursorL[0])) > -1) {
-						SelectState++;
-						if(KingThreat) {
-							if(chessBoard.checkmate(!playerTurn) == -1) gameState = -2;
-							else KingThreat = false;
+	int8_t players[2] = {RED,BLUE};
+	bool turn = true;
+	bool quit = false;
+
+	while(!quit) {
+		userI.updateInterface(chessBoard, retVal, checkState);
+		switch(gameState) {
+			case SELECT:
+				for(SELECT_STATES selectState = SELECT_PIECE; selectState < END_SELECT;){
+					if((quit = userI.Select(cursorL[selectState]))) break;
+					if(iswithinBoard(cursorL[selectState])){
+						switch(selectState) {
+							case SELECT_PIECE:
+								if(chessBoard.getPieceColour(cursorL[selectState].h,cursorL[selectState].w) == players[turn]) {
+									selectState = SELECT_LOCATION;
+									retVal = SELECT_OK;
+								} 
+								else retVal = INVALID_SELECT; //Invalid selection
+								break;
+							case SELECT_LOCATION:
+								if((retVal = chessBoard.movePiece(cursorL[SELECT_LOCATION],cursorL[SELECT_PIECE])) > -1) {
+									if(retVal == PAWN_PROMOTION) gameState = PROMOTE;
+									selectState = END_SELECT;
+								}
+								else selectState = SELECT_PIECE;
+								break;
+							case END_SELECT:
+								break;
 						}
-						if(retVal == 1) selectedPiece = cursorL[1];
 					}
-					else SelectState--;
+					else retVal = INVALID_SELECT; //Out of bounds
+					if(retVal < 1) userI.printSelectState(chessBoard,retVal);
 				}
-			}
-			else retVal = -100;
-		}
-		if(gameState != -2) {
-			gameState = chessBoard.checkmate(playerTurn);
-			if(gameState == -1) KingThreat = true;
-			playerTurn = !playerTurn;
+				checkState = chessBoard.checkmate(turn);
+				turn = !turn;
+				break;
+			case PROMOTE:
+				char c = userI.promotionSelect();
+				retVal = chessBoard.setPiece(cursorL[SELECT_LOCATION],c,!turn);
+				gameState = SELECT;
+				checkState = chessBoard.checkmate(!turn);
+				break;
 		}
 	}
 	return 0;

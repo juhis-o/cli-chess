@@ -14,7 +14,6 @@ class chessPiece {
         void moveEmptySpace(CursorLoc &newLoc, CursorLoc &oldLoc);
         void moveOccupiedSpace(CursorLoc &newLoc, CursorLoc &oldLoc);
         bool calcPath(CursorLoc &newLoc, CursorLoc &oldLoc);
-        enum errList : int8_t {THREAT = -5, MOVE_NOT_VALID,CAPTURING_OWN_PIECE,PIECE_ON_PATH,MOVE_CANCEL,MOVE_OK,PAWN_PROMOTION};
     public:
         chessPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef) : board(boardRef) {}
         virtual int move(CursorLoc &newLoc, CursorLoc &oldLoc) = 0;
@@ -105,13 +104,13 @@ class ChessBoard {
         std::ofstream file;
     public:
         ChessBoard();
-        int getPieceColour(int iter1, int iter2){return board[iter1][iter2]->pieceColour;};
-        int getPieceChar(int iter1, int iter2){return board[iter1][iter2]->chessChar;};
+        int getPieceColour(int h, int w){return board[h][w]->pieceColour;};
+        int getPieceChar(int h, int w){return board[h][w]->chessChar;};
         int setPiece(CursorLoc loc, char piece, bool color);
-        uint8_t* getSquareThreat(int iter1, int iter2){return board[iter1][iter2]->piecePath;};
-        bool* getPawnPath(int iter1, int iter2){return board[iter1][iter2]->pawnPath;};
+        uint8_t* getSquareThreat(int h, int w){return board[h][w]->piecePath;};
+        bool* getPawnPath(int h, int w){return board[h][w]->pawnPath;};
 //        bool* getKingThreat(int iter1, int iter2){return board[iter1][iter2]->threatensKing;};
-        int8_t checkmate(bool playerTurn);
+        enum CHECKMATE_STATE checkmate(bool playerTurn);
         CursorLoc* getKingPos(){return KingLoc;};
         int movePiece(CursorLoc &newLoc, CursorLoc &oldLoc){
             int ret = board[oldLoc.h][oldLoc.w]->move(newLoc,oldLoc);
