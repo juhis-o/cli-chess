@@ -7,7 +7,6 @@
 #include <memory>
 #include <fstream>
 
-
 class chessPiece {
     protected:
         std::vector<std::vector<std::unique_ptr<chessPiece>>>& board;
@@ -86,7 +85,6 @@ class kingPiece : public chessPiece {
         kingPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef) : chessPiece(boardRef) {
             chessChar = 'K';
         };
-        bool cantMove = false;
         int move(CursorLoc &newLoc, CursorLoc &oldLoc) override;
         void checkSquares(int h, int w, std::vector<ThreatLoc>& loc) override;
 };

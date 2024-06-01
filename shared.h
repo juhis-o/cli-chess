@@ -31,11 +31,8 @@ struct ThreatLoc {
 }__attribute__((packed));
 #endif
 
+const int8_t player[2] = {BLUE,RED};
 
-inline bool iswithinBoard(CursorLoc& loc){
-    return 0 <= loc.h && loc.h < BOARD_SIZE &&
-           0 <= loc.w && loc.w < BOARD_SIZE;
-}
-
-
+bool iswithinBoard(CursorLoc& loc);
+bool inBounds(int8_t h, int8_t w);
 #endif

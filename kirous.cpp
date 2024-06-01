@@ -87,7 +87,6 @@ void chessUI::updateInterface(ChessBoard &cBoard, int ret, enum CHECKMATE_STATE 
 				printw("Unknown return message %d", ret);
 				break;
 		}
-		
 		switch(check) {
 			case KING_THREATENED:
 				printw("\nKing is being threatened! Find way to stop threat");
@@ -103,12 +102,7 @@ void chessUI::updateInterface(ChessBoard &cBoard, int ret, enum CHECKMATE_STATE 
 				gameover = true;
 				break;
 		}
-		
-//	printw("Return code: %d; %d", ret, checkmate);
 	}
-//	else {
-//		printw("%s Player has selected %c piece", (BLUE == cBoard.getPieceColour(currentLoc.h,currentLoc.w)) ? "BLUE" : "RED", cBoard.getPieceChar(currentLoc.h,currentLoc.w));
-//	}
 	move(currentLoc.h, currentLoc.w);
 	refresh();
 }
@@ -144,18 +138,6 @@ void chessUI::printSelectState(ChessBoard & cBoard, int msg){
 	}
 	move(currentLoc.h, currentLoc.w);
 	refresh();
-/*
-
-		case MOVE_OK:
-			printw("Move ok");
-			break;
-		case PAWN_PROMOTION:
-			printw("Pawn promotion");
-			break;
-		case PAWN_PROMOTED:
-			printw("Pawn has been promoted");
-			break;
-*/
 }
 
 char chessUI::promotionSelect(){

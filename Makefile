@@ -2,7 +2,7 @@ CC = g++
 CFLAGS = -std=c++20 -Wall
 LIBS = -lncurses
 
-SRCS = main.cpp chess.cpp kirous.cpp
+SRCS = main.cpp chess.cpp kirous.cpp controller.cpp shared.cpp
 OBJS = $(SRCS:.cpp=.o)
 TARGET = a.out
 
