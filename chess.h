@@ -36,6 +36,7 @@ class emptyPiece : public chessPiece {
 class pawnPiece : public chessPiece {
     private: 
         bool firstMove = true;
+        const uint8_t promotionH[2] = {0,7};
     public: 
         pawnPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef) : chessPiece(boardRef) {
             chessChar = 'S';

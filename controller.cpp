@@ -25,7 +25,7 @@ int Controller::selectState(bool& quit){
 	int retVal = 0;
 	for(SELECT_STATES selectState = SELECT_PIECE; selectState < END_SELECT;){
 		if((quit = userI.Select(cursorL[selectState]))) break;
-		if(iswithinBoard(cursorL[selectState])){
+		if(inBounds(cursorL[selectState].h,cursorL[selectState].w)){
 			retVal = selection(selectState);
 		}
 		else retVal = INVALID_SELECT; //Out of bounds
@@ -51,7 +51,7 @@ int Controller::selection(SELECT_STATES& sel){
 
 int Controller::selectingPiece(SELECT_STATES& sel){
 	int ret = 0;
-	if(chessBoard.getPieceColour(cursorL[SELECT_PIECE].h,cursorL[SELECT_PIECE].w) == player[turn]) {
+	if(chessBoard.getPieceColour(cursorL[SELECT_PIECE].h,cursorL[SELECT_PIECE].w) == playerColours[turn]) {
 		sel = SELECT_LOCATION;
 		ret = SELECT_OK;
 	} 
