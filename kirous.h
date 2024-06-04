@@ -23,8 +23,8 @@ class chessUI {
         ~chessUI();
         bool Select(CursorLoc& loc);
         char promotionSelect();
-        void updateInterface(ChessBoard &cBoard, int ret, enum CHECKMATE_STATE check);
-        void printSelectState(ChessBoard &cBoard, int msg);
+        void updateInterface(ChessBoard &cBoard, chessPiece_retVals ret, enum CHECKMATE_STATE check);
+        void printSelectState(ChessBoard &cBoard, chessPiece_retVals msg);
 };
 
 #endif

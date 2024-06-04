@@ -31,9 +31,5 @@ struct ThreatLoc {
 }__attribute__((packed));
 #endif
 
-const int8_t playerColours[2] = {BLUE,RED};
-const int8_t directions[8][2] = {{1,1},{-1,-1},{-1,1},{1,-1},{0,1},{1,0},{-1,0},{0,-1}};
-
-bool iswithinBoard(CursorLoc& loc);
 bool inBounds(int8_t h, int8_t w);
 #endif

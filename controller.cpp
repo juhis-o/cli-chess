@@ -2,7 +2,7 @@
 
 Controller::Controller(){
     bool quit = false;
-    int retVal = 0;
+    chessPiece_retVals retVal = SELECT_OK;
     while(!quit) {
     userI.updateInterface(chessBoard, retVal, checkState);
     switch(gameState) {
@@ -21,21 +21,21 @@ Controller::Controller(){
     }
 }
 
-int Controller::selectState(bool& quit){
-	int retVal = 0;
+chessPiece_retVals Controller::selectState(bool& quit){
+	chessPiece_retVals retVal = SELECT_OK;
 	for(SELECT_STATES selectState = SELECT_PIECE; selectState < END_SELECT;){
 		if((quit = userI.Select(cursorL[selectState]))) break;
 		if(inBounds(cursorL[selectState].h,cursorL[selectState].w)){
 			retVal = selection(selectState);
 		}
 		else retVal = INVALID_SELECT; //Out of bounds
-		if(retVal < 1) userI.printSelectState(chessBoard,retVal);
+		if(retVal < MOVE_OK) userI.printSelectState(chessBoard,retVal);
 	}
 	return retVal;
 }
 
-int Controller::selection(SELECT_STATES& sel){
-	int retVal = 0;
+chessPiece_retVals Controller::selection(SELECT_STATES& sel){
+	chessPiece_retVals retVal = SELECT_OK;
 	switch(sel) {
 		case SELECT_PIECE:
 			retVal = selectingPiece(sel);
@@ -49,8 +49,8 @@ int Controller::selection(SELECT_STATES& sel){
 	return retVal;
 }
 
-int Controller::selectingPiece(SELECT_STATES& sel){
-	int ret = 0;
+chessPiece_retVals Controller::selectingPiece(SELECT_STATES& sel){
+	chessPiece_retVals ret = SELECT_OK;
 	if(chessBoard.getPieceColour(cursorL[SELECT_PIECE].h,cursorL[SELECT_PIECE].w) == playerColours[turn]) {
 		sel = SELECT_LOCATION;
 		ret = SELECT_OK;
@@ -59,8 +59,8 @@ int Controller::selectingPiece(SELECT_STATES& sel){
 	return ret;
 }
 
-int Controller::movePiecetoLoc(SELECT_STATES& sel){
-	int ret = 0;
+chessPiece_retVals Controller::movePiecetoLoc(SELECT_STATES& sel){
+	chessPiece_retVals ret = SELECT_OK;
 	if((ret = chessBoard.movePiece(cursorL[SELECT_LOCATION],cursorL[SELECT_PIECE])) > -1) {
 		if(ret == PAWN_PROMOTION) gameState = PROMOTE;
 		sel = END_SELECT;

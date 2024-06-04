@@ -19,11 +19,11 @@ chessUI::chessUI() {
     keypad(stdscr, TRUE);
 }
 
-void chessUI::updateInterface(ChessBoard &cBoard, int ret, enum CHECKMATE_STATE check) {
+void chessUI::updateInterface(ChessBoard &cBoard, chessPiece_retVals ret, enum CHECKMATE_STATE check) {
 	clear();
 	bool bg = 1;
-	for (int i = 0; i < BOARD_SIZE ; i++){
-		for (int j = 0; j < BOARD_SIZE; j++){
+	for (int8_t i = 0; i < BOARD_SIZE ; i++){
+		for (int8_t j = 0; j < BOARD_SIZE; j++){
 			char c = cBoard.getPieceChar(i,j);
 			#ifdef ThreatDebug
 			uint8_t *threat = cBoard.getSquareThreat(i,j);
@@ -107,7 +107,7 @@ void chessUI::updateInterface(ChessBoard &cBoard, int ret, enum CHECKMATE_STATE 
 	refresh();
 }
 
-void chessUI::printSelectState(ChessBoard & cBoard, int msg){
+void chessUI::printSelectState(ChessBoard& cBoard, chessPiece_retVals msg){
 	move(8, 0);
 	clrtoeol();
 	switch(msg) {

@@ -10,6 +10,7 @@ class Controller {
         enum SELECT_STATES{SELECT_PIECE, SELECT_LOCATION, END_SELECT};
         CHESS_STATES gameState = SELECT;
         CHECKMATE_STATE checkState = KING_SAFE;
+        const int8_t playerColours[2] = {BLUE,RED};
         bool turn = false;
         CursorLoc cursorL[2];
         ChessBoard chessBoard;
@@ -17,10 +18,10 @@ class Controller {
     public:
         Controller();
     private:
-        int movePiecetoLoc(SELECT_STATES& sel);
-        int selectingPiece(SELECT_STATES& sel);
-        int selection(SELECT_STATES& sel);
-        int selectState(bool& quit);
+        chessPiece_retVals movePiecetoLoc(SELECT_STATES& sel);
+        chessPiece_retVals selectingPiece(SELECT_STATES& sel);
+        chessPiece_retVals selection(SELECT_STATES& sel);
+        chessPiece_retVals selectState(bool& quit);
 };
 
 #endif
