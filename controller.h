@@ -10,7 +10,6 @@ class Controller {
         enum SELECT_STATES{SELECT_PIECE, SELECT_LOCATION, END_SELECT};
         CHESS_STATES gameState = SELECT;
         CHECKMATE_STATE checkState = KING_SAFE;
-        const int8_t playerColours[2] = {BLUE,RED};
         bool turn = false;
         CursorLoc cursorL[2];
         ChessBoard chessBoard;

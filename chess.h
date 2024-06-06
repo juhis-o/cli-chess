@@ -6,7 +6,7 @@
 #include <vector>
 #include <memory>
 
-const int8_t directions[8][2] = {{1,1},{-1,-1},{-1,1},{1,-1},{0,1},{1,0},{-1,0},{0,-1}};
+const int8_t directions[8][2] = {{1,1},{-1,-1},{-1,1},{1,-1},{0,1},{1,0},{-1,0},{0,-1}}; //For king, queen, bishop and tower(rook)
 
 class chessPiece {
     protected:
@@ -15,7 +15,7 @@ class chessPiece {
         void moveOccupiedSpace(CursorLoc &newLoc, CursorLoc &oldLoc);
         bool calcPath(CursorLoc &newLoc, CursorLoc &oldLoc);
     public:
-        chessPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef, uint8_t Colour) : board(boardRef), pieceColour(Colour) {}
+        chessPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef, uint8_t Colour) : board(boardRef), pieceColour(Colour){}
         virtual chessPiece_retVals move(CursorLoc &newLoc, CursorLoc &oldLoc) = 0;
         virtual void checkSquares(int8_t h, int8_t w, std::vector<ThreatLoc>& loc) = 0;
         char chessChar = ' '; //Chess piece
@@ -27,10 +27,8 @@ class chessPiece {
 
 class emptyPiece : public chessPiece {
     public:
-        emptyPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef, uint8_t Colour) : chessPiece(boardRef,Colour){
-            //pieceColour = 0;
-        };
-        chessPiece_retVals move(CursorLoc &newLoc, CursorLoc &oldLoc) override {return MOVE_OK;};
+        emptyPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef, uint8_t Colour) : chessPiece(boardRef,Colour){};
+        chessPiece_retVals move(CursorLoc &newLoc, CursorLoc &oldLoc) override {return MOVE_CANCEL;};
         void checkSquares(int8_t h, int8_t w, std::vector<ThreatLoc>& loc) override {};
 };
 
@@ -39,23 +37,29 @@ class pawnPiece : public chessPiece {
         bool firstMove = true;
         bool colour;
         uint8_t promoteRank;
+        uint8_t enPassantRank;
         int8_t dirH;
+        chessPiece_retVals forwardMove(CursorLoc &newLoc, CursorLoc &oldLoc, int8_t &movementY);
+        chessPiece_retVals captureMove(CursorLoc &newLoc, CursorLoc &oldLoc, int8_t &movementY);
+        void enPassantCapture(CursorLoc &newLoc, CursorLoc &oldLoc, int8_t h);
     public: 
-        pawnPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef, uint8_t Colour) : chessPiece(boardRef,Colour) {
+        pawnPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef, uint8_t Colour) : chessPiece(boardRef,Colour){
             colour = pieceColour != BLUE;
             promoteRank = (colour) ? 7 : 0;
-	        dirH = (colour) ? 1 : -1;	
+            enPassantRank = (colour) ? 4 : 3;
+	        dirH = (colour) ? 1 : -1;
             chessChar = 'S';
         };
         chessPiece_retVals move(CursorLoc &newLoc, CursorLoc &oldLoc) override;
         void checkSquares(int8_t h, int8_t w, std::vector<ThreatLoc>& loc) override;
+        bool enPassantable = false;
 };
 
 class towerPiece : public chessPiece {
     private:
         bool colour;
     public: 
-        towerPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef, uint8_t Colour) : chessPiece(boardRef,Colour) {
+        towerPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef, uint8_t Colour) : chessPiece(boardRef,Colour){
             colour = pieceColour != BLUE;
             chessChar = 'T';
         };
@@ -67,7 +71,7 @@ class bishopPiece : public chessPiece {
     private:
         bool colour;
     public: 
-        bishopPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef, uint8_t Colour) : chessPiece(boardRef,Colour) {
+        bishopPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef, uint8_t Colour) : chessPiece(boardRef,Colour){
             colour = pieceColour != BLUE;
             chessChar = 'B';
         };
@@ -79,7 +83,7 @@ class queenPiece : public chessPiece {
     private:
         bool colour;
     public: 
-        queenPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef, uint8_t Colour) : chessPiece(boardRef,Colour) {
+        queenPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef, uint8_t Colour) : chessPiece(boardRef,Colour){
             colour = pieceColour != BLUE;
             chessChar = 'Q';
         };
@@ -91,19 +95,19 @@ class horsePiece : public chessPiece {
     private:
         bool colour;
     public: 
-        horsePiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef, uint8_t Colour) : chessPiece(boardRef,Colour) {
+        horsePiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef, uint8_t Colour) : chessPiece(boardRef,Colour){
             colour = pieceColour != BLUE;
             chessChar = 'H';
         };
         chessPiece_retVals move(CursorLoc &newLoc, CursorLoc &oldLoc) override;
-        void checkSquares(int8_t h, int8_t w, std::vector<ThreatLoc>& loc) override;
+        void checkSquares(int8_t h, int8_t w, std::vector<ThreatLoc>& loc) override;       
 };
 
 class kingPiece : public chessPiece {
     private:
         bool colour;
     public: 
-        kingPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef, uint8_t Colour) : chessPiece(boardRef,Colour) {
+        kingPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef, uint8_t Colour) : chessPiece(boardRef,Colour){
             colour = pieceColour != BLUE;
             chessChar = 'K';
         };
@@ -115,6 +119,7 @@ class ChessBoard {
     private:
         void FillRow(uint8_t row, uint8_t& unit_colour, std::vector<std::unique_ptr<chessPiece>>&Board);
         void updateThreatSquares(bool reset);
+        void updateThreatSquares(bool reset, bool turn);
         bool canKingMove(CursorLoc& KingLoc);
         bool findOverlaps(CursorLoc& KingLoc, ThreatLoc &threatPiece);
         CursorLoc KingLoc[2] = {0};
@@ -123,6 +128,7 @@ class ChessBoard {
         enum rows{BACKROW,FRONTROW,EMPTYROW};
     public:
         ChessBoard();
+        const int8_t playerColours[2] = {BLUE,RED};
         uint8_t getPieceColour(int8_t h, int8_t w){return board[h][w]->pieceColour;};
         uint8_t* getSquareThreat(int8_t h,int8_t w){return board[h][w]->piecePath;};
         char getPieceChar(int8_t h, int8_t w){return board[h][w]->chessChar;};
@@ -130,9 +136,9 @@ class ChessBoard {
         bool* getPawnPath(int8_t h, int8_t w){return board[h][w]->pawnPath;};
         enum CHECKMATE_STATE checkmate(bool playerTurn);
         CursorLoc* getKingPos(){return KingLoc;};
-        chessPiece_retVals movePiece(CursorLoc &newLoc, CursorLoc &oldLoc){
+        chessPiece_retVals movePiece(CursorLoc &newLoc, CursorLoc &oldLoc, bool playerTurn){
             chessPiece_retVals ret = board[oldLoc.h][oldLoc.w]->move(newLoc,oldLoc);
-            updateThreatSquares(true);
+            updateThreatSquares(true, playerTurn);
             return ret;
         };
         ~ChessBoard() {};

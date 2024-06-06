@@ -120,6 +120,9 @@ void chessUI::printSelectState(ChessBoard& cBoard, chessPiece_retVals msg){
 		case PAWN_WRONG_DIR:
 			printw("Wrong direction");
 			break;
+		case PAWN_NO_PIECE_TO_CAPTURE:
+			printw("No piece to capture");
+			break;
 		case MOVE_NOT_VALID:
 			printw("Move not valid");
 			break;

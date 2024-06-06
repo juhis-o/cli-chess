@@ -2,7 +2,7 @@
 
 # Compiler and flags
 CC = cl
-CFLAGS = /std:c++20 /Wall /I C:\PDCurses-3.9
+CFLAGS = /EHsc /std:c++20 /W4 /I C:\PDCurses-3.9
 LIBS = pdcurses.lib
 
 # Source and object files
