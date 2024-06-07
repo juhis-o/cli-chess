@@ -63,6 +63,7 @@ class towerPiece : public chessPiece {
             colour = pieceColour != BLUE;
             chessChar = 'T';
         };
+        bool firstMove = true;
         chessPiece_retVals move(CursorLoc &newLoc, CursorLoc &oldLoc) override;
         void checkSquares(int8_t h, int8_t w, std::vector<ThreatLoc>& loc) override;
 };
@@ -105,14 +106,19 @@ class horsePiece : public chessPiece {
 
 class kingPiece : public chessPiece {
     private:
+        bool firstMove = true;
         bool colour;
     public: 
         kingPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef, uint8_t Colour) : chessPiece(boardRef,Colour){
             colour = pieceColour != BLUE;
             chessChar = 'K';
         };
+        chessPiece_retVals castling(CursorLoc& newLoc, CursorLoc& oldLoc);
+        bool pathClear(CursorLoc &newLoc, CursorLoc &oldLoc);
+        void moveCastling(CursorLoc &tower, CursorLoc &king, CursorLoc &target);
         chessPiece_retVals move(CursorLoc &newLoc, CursorLoc &oldLoc) override;
         void checkSquares(int8_t h, int8_t w, std::vector<ThreatLoc>& loc) override;
+
 };
 
 class ChessBoard {

@@ -58,11 +58,6 @@ chessPiece_retVals pawnPiece::forwardMove(CursorLoc &newLoc, CursorLoc &oldLoc, 
 	return ret;
 }
 
-//				else if((board[i][j]->chessChar == 'S') && playerColours[!turn] == board[i][j]->pieceColour){
-//					auto* pawn = dynamic_cast<pawnPiece*>(board[i][j].get());
-//					if(pawn)pawn->enPassantable = false;
-//				}
-
 void pawnPiece::enPassantCapture(CursorLoc &newLoc, CursorLoc &oldLoc, int8_t h){
 	board[newLoc.h][newLoc.w].swap(board[oldLoc.h][oldLoc.w]);
 	board[oldLoc.h][oldLoc.w] = std::make_unique<emptyPiece>(board,0);
@@ -87,11 +82,13 @@ chessPiece_retVals pawnPiece::captureMove(CursorLoc &newLoc, CursorLoc &oldLoc, 
 				if(pawn->enPassantable) 
 					enPassantCapture(newLoc,oldLoc,enPass);
 				else
-					ret = (chessPiece_retVals)enPass;
+					ret = MOVE_NOT_VALID;
 			}
-		}	else
+			else
 				ret = MOVE_NOT_VALID;
-			
+		}
+		else
+			ret = MOVE_NOT_VALID;
 	}
 	else 
 		ret = PAWN_NO_PIECE_TO_CAPTURE;
@@ -148,11 +145,15 @@ chessPiece_retVals towerPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 		return MOVE_CANCEL;
 	if((newLoc.h == oldLoc.h) || (newLoc.w == oldLoc.w))
 		if(calcPath(newLoc,oldLoc))
-			if(board[newLoc.h][newLoc.w]->chessChar == ' ')
+			if(board[newLoc.h][newLoc.w]->chessChar == ' '){
 				moveEmptySpace(newLoc, oldLoc);
+				firstMove = false;
+			}
 			else
-            	if((pieceColour != board[newLoc.h][newLoc.w]->pieceColour))
+            	if((pieceColour != board[newLoc.h][newLoc.w]->pieceColour)){
 					moveOccupiedSpace(newLoc, oldLoc);
+					firstMove = false;
+				}
 				else
 					ret = CAPTURING_OWN_PIECE;
 		else
@@ -297,26 +298,80 @@ void kingPiece::checkSquares(int8_t h, int8_t w, std::vector<ThreatLoc>& loc){
 	}
 }
 
+void kingPiece::moveCastling(CursorLoc& tower, CursorLoc &king, CursorLoc &target){
+	moveEmptySpace(target,king);
+	target.w = (target.w == 2) ? 3 : 5; 
+	moveEmptySpace(target,tower);
+}
+
+bool kingPiece::pathClear(CursorLoc& targetLoc, CursorLoc &oldLoc){
+    int8_t stepX = (oldLoc.w > targetLoc.w) ? -1 : (oldLoc.w < targetLoc.w) ? 1 : 0;
+	if(board[oldLoc.h][oldLoc.w]->piecePath[!colour]){
+		return false;
+	}
+    for(int8_t w = oldLoc.w + stepX; w != targetLoc.w; w += stepX){
+        if((board[oldLoc.h][w]->chessChar != ' ') && !(board[oldLoc.h][w]->piecePath[!colour])) 
+            return false;
+    }
+    return true;
+}
+
+
+chessPiece_retVals kingPiece::castling(CursorLoc& newLoc, CursorLoc& oldLoc){		
+	chessPiece_retVals ret = MOVE_OK;
+	if((board[newLoc.h][newLoc.w]->chessChar == 'T') && (pieceColour == board[newLoc.h][newLoc.w]->pieceColour)){
+		auto* tower = dynamic_cast<towerPiece*>(board[newLoc.h][newLoc.w].get());
+		if(tower){
+			if((tower->firstMove)){
+				int8_t locW = (oldLoc.w > newLoc.w) ? 2 : -1;
+				CursorLoc targetloc{oldLoc.h,static_cast<int8_t>(newLoc.w+locW)};
+				if(pathClear(targetloc,oldLoc)){
+					moveCastling(newLoc,oldLoc,targetloc);
+					firstMove = false;
+				}
+				else
+					ret = INVALID_SELECT;
+			}
+			else 
+				ret = THREAT;
+		}
+		else
+			ret = PAWN_NO_PIECE_TO_CAPTURE;
+	}
+	else
+		ret = PAWN_WRONG_DIR;
+	
+	return ret;
+}
+
 chessPiece_retVals kingPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 	int8_t movementY = newLoc.h - oldLoc.h;
 	int8_t movementX = newLoc.w - oldLoc.w;
 	chessPiece_retVals ret = MOVE_OK;
 	if(memcmp(&newLoc,&oldLoc,sizeof(newLoc)) == 0)
 		return MOVE_CANCEL;
-	if(abs(movementX) <= 1 && abs(movementY) <= 1)
+	if(abs(movementX) <= 1 && abs(movementY) <= 1){
 		if(board[newLoc.h][newLoc.w]->chessChar == ' ')
-			if(!board[newLoc.h][newLoc.w]->piecePath[!colour])
+			if(!board[newLoc.h][newLoc.w]->piecePath[!colour]){
 				moveEmptySpace(newLoc, oldLoc);
+				firstMove = false;
+			}
 			else
 				ret = THREAT;
 		else
             if(pieceColour != board[newLoc.h][newLoc.w]->pieceColour)
-				if(!board[newLoc.h][newLoc.w]->piecePath[!colour])
+				if(!board[newLoc.h][newLoc.w]->piecePath[!colour]){
 					moveOccupiedSpace(newLoc, oldLoc);
+					firstMove = false;
+				}
 				else
 					ret = THREAT;
 			else
 				ret = CAPTURING_OWN_PIECE;
+	}
+	else if(firstMove && (abs(movementX) > 1) && abs(movementY == 0)){
+		ret = castling(newLoc,oldLoc);
+	}
 	else
 		ret = MOVE_NOT_VALID;
 
