@@ -298,7 +298,9 @@ void kingPiece::checkSquares(int8_t h, int8_t w, std::vector<ThreatLoc>& loc){
 	}
 }
 
-void kingPiece::moveCastling(CursorLoc& tower, CursorLoc &king, CursorLoc &target){
+void kingPiece::moveCastling(CursorLoc& tower, CursorLoc &king){
+	int8_t locW = (king.w > tower.w) ? 2 : -1;
+	CursorLoc target{tower.h,static_cast<int8_t>(tower.w+locW)};
 	moveEmptySpace(target,king);
 	target.w = (target.w == 2) ? 3 : 5; 
 	moveEmptySpace(target,tower);
@@ -306,13 +308,16 @@ void kingPiece::moveCastling(CursorLoc& tower, CursorLoc &king, CursorLoc &targe
 
 bool kingPiece::pathClear(CursorLoc& targetLoc, CursorLoc &oldLoc){
     int8_t stepX = (oldLoc.w > targetLoc.w) ? -1 : (oldLoc.w < targetLoc.w) ? 1 : 0;
-	if(board[oldLoc.h][oldLoc.w]->piecePath[!colour]){
+	int8_t target = (stepX > 0) ? 2 : -2;
+	if(!calcPath(targetLoc,oldLoc))
 		return false;
-	}
-    for(int8_t w = oldLoc.w + stepX; w != targetLoc.w; w += stepX){
-        if((board[oldLoc.h][w]->chessChar != ' ') && !(board[oldLoc.h][w]->piecePath[!colour])) 
+	if(board[oldLoc.h][oldLoc.w]->piecePath[!colour])
+		return false;
+    for(int8_t w = oldLoc.w + stepX; w != oldLoc.w+target; w += stepX){
+        if((board[oldLoc.h][w]->piecePath[!colour])) 
             return false;
     }
+
     return true;
 }
 
@@ -323,10 +328,8 @@ chessPiece_retVals kingPiece::castling(CursorLoc& newLoc, CursorLoc& oldLoc){
 		auto* tower = dynamic_cast<towerPiece*>(board[newLoc.h][newLoc.w].get());
 		if(tower){
 			if((tower->firstMove)){
-				int8_t locW = (oldLoc.w > newLoc.w) ? 2 : -1;
-				CursorLoc targetloc{oldLoc.h,static_cast<int8_t>(newLoc.w+locW)};
-				if(pathClear(targetloc,oldLoc)){
-					moveCastling(newLoc,oldLoc,targetloc);
+				if(pathClear(newLoc,oldLoc)){
+					moveCastling(newLoc,oldLoc);
 					firstMove = false;
 				}
 				else

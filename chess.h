@@ -115,7 +115,7 @@ class kingPiece : public chessPiece {
         };
         chessPiece_retVals castling(CursorLoc& newLoc, CursorLoc& oldLoc);
         bool pathClear(CursorLoc &newLoc, CursorLoc &oldLoc);
-        void moveCastling(CursorLoc &tower, CursorLoc &king, CursorLoc &target);
+        void moveCastling(CursorLoc &tower, CursorLoc &king);
         chessPiece_retVals move(CursorLoc &newLoc, CursorLoc &oldLoc) override;
         void checkSquares(int8_t h, int8_t w, std::vector<ThreatLoc>& loc) override;
 
