@@ -20,7 +20,7 @@ bool chessPiece::calcPath(CursorLoc &newLoc, CursorLoc &oldLoc){
 }
 
 void pawnPiece::checkSquares(int8_t h, int8_t w, std::vector<ThreatLoc>& loc){
-	for(int8_t i = dirH, target = firstMove+abs(dirH)+1; abs(i) < target; i+=dirH){
+	for(int8_t i = dirH, target = firstMove+abs(dirH)+1; (int8_t)abs(i) < target; i+=dirH){
 		if(!inBounds(h+i,w))
 			break;
 		if((board[h+i][w]->chessChar == ' '))
@@ -64,7 +64,7 @@ void pawnPiece::enPassantCapture(CursorLoc &newLoc, CursorLoc &oldLoc, int8_t h)
 	board[h][newLoc.w] = std::make_unique<emptyPiece>(board,0);
 }
 
-chessPiece_retVals pawnPiece::captureMove(CursorLoc &newLoc, CursorLoc &oldLoc, int8_t &movementY) {
+chessPiece_retVals pawnPiece::captureMove(CursorLoc &newLoc, CursorLoc &oldLoc) {
 	chessPiece_retVals ret = MOVE_OK;
 	if(board[newLoc.h][newLoc.w]->chessChar != ' ')
         if((pieceColour != board[newLoc.h][newLoc.w]->pieceColour)){
@@ -109,7 +109,7 @@ chessPiece_retVals pawnPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 		if(movementX == 0)
 			ret = forwardMove(newLoc,oldLoc,movementY);
 		else if(abs(movementX) == 1 && abs(movementY) == 1)
-			ret = captureMove(newLoc,oldLoc,movementY);
+			ret = captureMove(newLoc,oldLoc);
 		else
 			ret = MOVE_NOT_VALID;
 	else
@@ -399,14 +399,14 @@ enum CHECKMATE_STATE ChessBoard::checkmate(bool playerTurn){
 }
 
 
-bool ChessBoard::canKingMove(CursorLoc& KingLoc){
-	bool colour = board[KingLoc.h][KingLoc.w]->pieceColour != BLUE;
+bool ChessBoard::canKingMove(CursorLoc& king){
+	bool colour = board[king.h][king.w]->pieceColour != BLUE;
 	bool canMove = false;
 	for(int8_t i = 0; i < 8; i++ ) {
-		if(!inBounds(KingLoc.h+directions[i][0],KingLoc.w+directions[i][1]) ||
-		(board[KingLoc.h][KingLoc.w]->pieceColour == board[KingLoc.h+directions[i][0]][KingLoc.w+directions[i][1]]->pieceColour)) //Skip iteration, if square is out of bounds or if piece is same color as king
+		if(!inBounds(king.h+directions[i][0],king.w+directions[i][1]) ||
+		(board[king.h][king.w]->pieceColour == board[king.h+directions[i][0]][king.w+directions[i][1]]->pieceColour)) //Skip iteration, if square is out of bounds or if piece is same color as king
 			continue;
-		if(!board[KingLoc.h+directions[i][0]][KingLoc.w+directions[i][1]]->piecePath[!colour]){
+		if(!board[king.h+directions[i][0]][king.w+directions[i][1]]->piecePath[!colour]){
 			canMove = true;
 			break;
 		}

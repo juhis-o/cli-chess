@@ -28,8 +28,8 @@ class chessPiece {
 class emptyPiece : public chessPiece {
     public:
         emptyPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef, uint8_t Colour) : chessPiece(boardRef,Colour){};
-        chessPiece_retVals move(CursorLoc &newLoc, CursorLoc &oldLoc) override {return MOVE_CANCEL;};
-        void checkSquares(int8_t h, int8_t w, std::vector<ThreatLoc>& loc) override {};
+        chessPiece_retVals move(CursorLoc &newLoc, CursorLoc &oldLoc) override {(void)newLoc;(void)oldLoc; return MOVE_CANCEL;};
+        void checkSquares(int8_t h, int8_t w, std::vector<ThreatLoc>& loc) override {(void)h;(void)w,(void)loc;};
 };
 
 class pawnPiece : public chessPiece {
@@ -40,7 +40,7 @@ class pawnPiece : public chessPiece {
         uint8_t enPassantRank;
         int8_t dirH;
         chessPiece_retVals forwardMove(CursorLoc &newLoc, CursorLoc &oldLoc, int8_t &movementY);
-        chessPiece_retVals captureMove(CursorLoc &newLoc, CursorLoc &oldLoc, int8_t &movementY);
+        chessPiece_retVals captureMove(CursorLoc &newLoc, CursorLoc &oldLoc);
         void enPassantCapture(CursorLoc &newLoc, CursorLoc &oldLoc, int8_t h);
     public: 
         pawnPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef, uint8_t Colour) : chessPiece(boardRef,Colour){
@@ -126,7 +126,7 @@ class ChessBoard {
         void FillRow(uint8_t row, uint8_t& unit_colour, std::vector<std::unique_ptr<chessPiece>>&Board);
         void updateThreatSquares(bool reset);
         void updateThreatSquares(bool reset, bool turn);
-        bool canKingMove(CursorLoc& KingLoc);
+        bool canKingMove(CursorLoc& king);
         bool findOverlaps(CursorLoc& KingLoc, ThreatLoc &threatPiece);
         CursorLoc KingLoc[2] = {0};
         std::vector<std::vector<std::unique_ptr<chessPiece>>> board;
