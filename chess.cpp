@@ -333,16 +333,16 @@ chessPiece_retVals kingPiece::castling(CursorLoc& newLoc, CursorLoc& oldLoc){
 					firstMove = false;
 				}
 				else
-					ret = INVALID_SELECT;
+					ret = CASTLING_PATH_FAIL;
 			}
 			else 
-				ret = THREAT;
+				ret = TOWER_HAS_MOVED;
 		}
 		else
-			ret = PAWN_NO_PIECE_TO_CAPTURE;
+			ret = MOVE_NOT_VALID;
 	}
 	else
-		ret = PAWN_WRONG_DIR;
+		ret = MOVE_NOT_VALID;
 	
 	return ret;
 }
