@@ -47,7 +47,7 @@ class pawnPiece : public chessPiece {
             colour = pieceColour != BLUE;
             promoteRank = (colour) ? 7 : 0;
             enPassantRank = (colour) ? 4 : 3;
-	        dirH = (colour) ? 1 : -1;
+            dirH = (colour) ? 1 : -1;
             chessChar = 'S';
         };
         chessPiece_retVals move(CursorLoc &newLoc, CursorLoc &oldLoc) override;
