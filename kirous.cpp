@@ -117,6 +117,9 @@ void chessUI::printSelectState(ChessBoard& cBoard, chessPiece_retVals msg){
 		case THREAT:
 			printw("King cannot move location which is being threatened by opposite side");
 			break;
+		case CANT_RISK_OWN_KING:
+			printw("Can't risk own king");
+			break;
 		case CASTLING_PATH_FAIL:
 			printw("Path for castling is not clear");
 			break;

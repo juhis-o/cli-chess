@@ -16,6 +16,7 @@ class chessPiece {
         bool calcPath(CursorLoc &newLoc, CursorLoc &oldLoc);
     public:
         chessPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef, uint8_t Colour) : board(boardRef), pieceColour(Colour){}
+        virtual std::unique_ptr<chessPiece> clone() const = 0;
         virtual chessPiece_retVals move(CursorLoc &newLoc, CursorLoc &oldLoc) = 0;
         virtual void checkSquares(int8_t h, int8_t w, std::vector<ThreatLoc>& loc) = 0;
         char chessChar = ' '; //Chess piece
@@ -30,6 +31,9 @@ class emptyPiece : public chessPiece {
         emptyPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef, uint8_t Colour) : chessPiece(boardRef,Colour){};
         chessPiece_retVals move(CursorLoc &newLoc, CursorLoc &oldLoc) override {return MOVE_CANCEL;};
         void checkSquares(int8_t h, int8_t w, std::vector<ThreatLoc>& loc) override {};
+        std::unique_ptr<chessPiece> clone() const override {
+        return std::make_unique<emptyPiece>(*this);
+    }
 };
 
 class pawnPiece : public chessPiece {
@@ -52,6 +56,9 @@ class pawnPiece : public chessPiece {
         };
         chessPiece_retVals move(CursorLoc &newLoc, CursorLoc &oldLoc) override;
         void checkSquares(int8_t h, int8_t w, std::vector<ThreatLoc>& loc) override;
+        std::unique_ptr<chessPiece> clone() const override {
+        return std::make_unique<pawnPiece>(*this);
+    }
         bool enPassantable = false;
 };
 
@@ -66,6 +73,9 @@ class towerPiece : public chessPiece {
         bool firstMove = true;
         chessPiece_retVals move(CursorLoc &newLoc, CursorLoc &oldLoc) override;
         void checkSquares(int8_t h, int8_t w, std::vector<ThreatLoc>& loc) override;
+        std::unique_ptr<chessPiece> clone() const override {
+        return std::make_unique<towerPiece>(*this);
+    }
 };
 
 class bishopPiece : public chessPiece {
@@ -78,6 +88,9 @@ class bishopPiece : public chessPiece {
         };
         chessPiece_retVals move(CursorLoc &newLoc, CursorLoc &oldLoc) override;
         void checkSquares(int8_t h, int8_t w, std::vector<ThreatLoc>& loc) override;
+        std::unique_ptr<chessPiece> clone() const override {
+        return std::make_unique<bishopPiece>(*this);
+    }
 };
 
 class queenPiece : public chessPiece {
@@ -90,6 +103,9 @@ class queenPiece : public chessPiece {
         };
         chessPiece_retVals move(CursorLoc &newLoc, CursorLoc &oldLoc) override;
         void checkSquares(int8_t h, int8_t w, std::vector<ThreatLoc>& loc) override;
+        std::unique_ptr<chessPiece> clone() const override {
+        return std::make_unique<queenPiece>(*this);
+    }
 };
 
 class horsePiece : public chessPiece {
@@ -101,7 +117,10 @@ class horsePiece : public chessPiece {
             chessChar = 'H';
         };
         chessPiece_retVals move(CursorLoc &newLoc, CursorLoc &oldLoc) override;
-        void checkSquares(int8_t h, int8_t w, std::vector<ThreatLoc>& loc) override;       
+        void checkSquares(int8_t h, int8_t w, std::vector<ThreatLoc>& loc) override;
+        std::unique_ptr<chessPiece> clone() const override {
+        return std::make_unique<horsePiece>(*this);
+    }       
 };
 
 class kingPiece : public chessPiece {
@@ -118,6 +137,9 @@ class kingPiece : public chessPiece {
         void moveCastling(CursorLoc &tower, CursorLoc &king);
         chessPiece_retVals move(CursorLoc &newLoc, CursorLoc &oldLoc) override;
         void checkSquares(int8_t h, int8_t w, std::vector<ThreatLoc>& loc) override;
+        std::unique_ptr<chessPiece> clone() const override {
+        return std::make_unique<kingPiece>(*this);
+    }
 
 };
 
@@ -142,12 +164,9 @@ class ChessBoard {
         bool* getPawnPath(int8_t h, int8_t w){return board[h][w]->pawnPath;};
         enum CHECKMATE_STATE checkmate(bool playerTurn);
         CursorLoc* getKingPos(){return KingLoc;};
-        chessPiece_retVals movePiece(CursorLoc &newLoc, CursorLoc &oldLoc, bool playerTurn){
-            chessPiece_retVals ret = board[oldLoc.h][oldLoc.w]->move(newLoc,oldLoc);
-            updateThreatSquares(true, playerTurn);
-            return ret;
-        };
-        ~ChessBoard() {};
+        chessPiece_retVals movePiece(CursorLoc &newLoc, CursorLoc &oldLoc, bool playerTurn);
+        std::vector<std::vector<std::unique_ptr<chessPiece>>> deepCopyBoard(const std::vector<std::vector<std::unique_ptr<chessPiece>>>& board);
+        ~ChessBoard(){};
 };
 
 #endif

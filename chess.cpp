@@ -164,14 +164,14 @@ chessPiece_retVals towerPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 }
 
 void bishopPiece::checkSquares(int8_t h, int8_t w, std::vector<ThreatLoc>& loc){
-	for(uint8_t d = 0; d < 4; d++) {
+	for(uint8_t d = 0; d < 4; d++){
 		bool piecePassed = false;
 		int8_t i = directions[d][0], j = directions[d][1], dir1 = directions[d][0], dir2 = directions[d][1];
 		for(;inBounds(h+i,w+j); i+=dir1, j+=dir2) {
 			if(!board[h+i][w+j]->piecePath[colour])
 				board[h+i][w+j]->piecePath[colour] = true;
-			if(piecePassed || board[h+i][w+j]->chessChar != ' ') {
-				if((board[h+i][w+j]->chessChar == 'K')) {
+			if(piecePassed || board[h+i][w+j]->chessChar != ' '){
+				if((board[h+i][w+j]->chessChar == 'K')){
 					piecePassed = true;
 					if((pieceColour != board[h+i][w+j]->pieceColour)){
 						ThreatLoc newThreat{h,w,false};
@@ -245,10 +245,10 @@ chessPiece_retVals horsePiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 
 
 void queenPiece::checkSquares(int8_t h, int8_t w, std::vector<ThreatLoc>& loc){
-	for(uint8_t d = 0; d < 8; d++) {
+	for(uint8_t d = 0; d < 8; d++){
 		int8_t i = directions[d][0], j = directions[d][1], dir1 = directions[d][0], dir2 = directions[d][1];
 		bool piecePassed = false;
-		for(;inBounds(h+i,w+j); i+=dir1, j+=dir2) {
+		for(;inBounds(h+i,w+j); i+=dir1, j+=dir2){
 			if(!board[h+i][w+j]->piecePath[colour])
 				board[h+i][w+j]->piecePath[colour] = true;
 			if(piecePassed || board[h+i][w+j]->chessChar != ' '){
@@ -290,7 +290,7 @@ chessPiece_retVals queenPiece::move(CursorLoc &newLoc, CursorLoc &oldLoc){
 
 void kingPiece::checkSquares(int8_t h, int8_t w, std::vector<ThreatLoc>& loc){
 	(void)loc;
-	for(int8_t d = 0; d < 8; d++) {
+	for(int8_t d = 0; d < 8; d++){
 		if(!inBounds(h+directions[d][0],w+directions[d][1]))
 			continue;
 		if(!board[h+directions[d][0]][w+directions[d][1]]->piecePath[colour]) 
@@ -398,7 +398,6 @@ enum CHECKMATE_STATE ChessBoard::checkmate(bool playerTurn){
 	return CHECKMATE;
 }
 
-
 bool ChessBoard::canKingMove(CursorLoc& KingLoc){
 	bool colour = board[KingLoc.h][KingLoc.w]->pieceColour != BLUE;
 	bool canMove = false;
@@ -436,6 +435,22 @@ bool ChessBoard::findOverlaps(CursorLoc &kingLoc, ThreatLoc &threatPiece){
     }
 
     return false;
+}
+
+std::vector<std::vector<std::unique_ptr<chessPiece>>> ChessBoard::deepCopyBoard(const std::vector<std::vector<std::unique_ptr<chessPiece>>>& board) {
+    std::vector<std::vector<std::unique_ptr<chessPiece>>> temp;
+    for (const auto& row : board) {
+        std::vector<std::unique_ptr<chessPiece>> tempRow;
+        for (const auto& piece : row) {
+            if (piece) {
+                tempRow.push_back(piece->clone());
+            } else {
+                tempRow.push_back(nullptr);
+            }
+        }
+        temp.push_back(std::move(tempRow));
+    }
+    return temp;
 }
 
 ChessBoard::ChessBoard() {
@@ -518,7 +533,37 @@ void ChessBoard::FillRow(uint8_t row, uint8_t& unit_colour, std::vector<std::uni
 	}
 }
 
-void ChessBoard::updateThreatSquares(bool reset) {
+chessPiece_retVals ChessBoard::movePiece(CursorLoc &newLoc, CursorLoc &oldLoc, bool playerTurn){
+	std::vector<std::vector<std::unique_ptr<chessPiece>>> temp = deepCopyBoard(board);
+	chessPiece_retVals ret = board[oldLoc.h][oldLoc.w]->move(newLoc,oldLoc);
+	updateThreatSquares(true, playerTurn);
+
+	if(board[KingLoc[playerTurn].h][KingLoc[playerTurn].w]->piecePath[!playerTurn]){
+		board = deepCopyBoard(temp);
+		ret = CANT_RISK_OWN_KING;
+	}
+
+    return ret;
+}
+
+std::vector<std::vector<std::unique_ptr<chessPiece>>> deepCopyBoard(const std::vector<std::vector<std::unique_ptr<chessPiece>>>& board) {
+    std::vector<std::vector<std::unique_ptr<chessPiece>>> temp;
+    for(const auto& row : board){
+        std::vector<std::unique_ptr<chessPiece>> tempRow;
+        for (const auto& piece : row) {
+            if (piece){
+                tempRow.push_back(piece->clone());
+            } else{
+                tempRow.push_back(nullptr);
+            }
+        }
+        temp.push_back(std::move(tempRow));
+    }
+
+    return temp;
+}
+
+void ChessBoard::updateThreatSquares(bool reset){
 	if(reset) {
 		for (int8_t i = 0; i < BOARD_SIZE; i++){
 			for(int8_t j = 0; j < BOARD_SIZE; j++){
@@ -544,7 +589,7 @@ void ChessBoard::updateThreatSquares(bool reset) {
 
 }
 
-void ChessBoard::updateThreatSquares(bool reset, bool turn) {
+void ChessBoard::updateThreatSquares(bool reset, bool turn){
 	if(reset) {
 		for (int8_t i = 0; i < BOARD_SIZE; i++){
 			for(int8_t j = 0; j < BOARD_SIZE; j++){

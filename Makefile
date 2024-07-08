@@ -1,10 +1,10 @@
 CC = g++
-CFLAGS = -std=c++20 -Wall
+CFLAGS = -static -std=c++20 -Wall -O3
 LIBS = -lncurses
 
 SRCS = main.cpp chess.cpp kirous.cpp controller.cpp shared.cpp
 OBJS = $(SRCS:.cpp=.o)
-TARGET = a.out
+TARGET = cli-chess
 
 # Check if DEBUG is set to 1 and add the -DThreatDebug flag
 ifdef DEBUG
