@@ -29,13 +29,9 @@ class chessPiece {
 class emptyPiece : public chessPiece {
     public:
         emptyPiece(std::vector<std::vector<std::unique_ptr<chessPiece>>>& boardRef, uint8_t Colour) : chessPiece(boardRef,Colour){};
-        chessPiece_retVals move(CursorLoc &newLoc, CursorLoc &oldLoc) override {return MOVE_CANCEL;};
-        void checkSquares(int8_t h, int8_t w, std::vector<ThreatLoc>& loc) override {};
-        std::unique_ptr<chessPiece> clone() const override {
-        return std::make_unique<emptyPiece>(*this);
-    }
         chessPiece_retVals move(CursorLoc &newLoc, CursorLoc &oldLoc) override {(void)newLoc;(void)oldLoc; return MOVE_CANCEL;};
         void checkSquares(int8_t h, int8_t w, std::vector<ThreatLoc>& loc) override {(void)h;(void)w,(void)loc;};
+        std::unique_ptr<chessPiece> clone() const override {return std::make_unique<emptyPiece>(*this);};
 };
 
 class pawnPiece : public chessPiece {
