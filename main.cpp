@@ -1,6 +1,6 @@
 #include "controller.h"
 
 int main(){
-	Controller chessGame;
-	return 0;
+    Controller chessGame;
+    return 0;
 }
