@@ -1,7 +1,7 @@
 # cli-chess
 cli-chess is basic chess which is played in command-line-interface. cli-chess supports features: Castling, En passant and Promotion.
 Binaries are available at releases.
-
+![Cli-chess-preview image](https://i.imgur.com/JTqqUNg.png)
 ## Requirements
 - C++14+ Compiler
 - ncurses and g++ for linux or PDCurses, Microsoft C++ toolset for Windows
