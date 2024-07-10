@@ -6,6 +6,8 @@ Binaries are available at releases.
 - C++14+ Compiler
 - ncurses and g++ for linux or PDCurses, Microsoft C++ toolset for Windows
 
+## Compiling
+
 ### Compiling for linux
 1. Install ncurses-dev package from your linux-package manager.
 2. ```sh
