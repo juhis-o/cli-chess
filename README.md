@@ -24,7 +24,7 @@ Binaries are available at releases.
 
 ### Compiling for windows
 1. Install PDCurses https://pdcurses.org/ 
-2. Open developer tools
+2. Open VS Developer command prompt
    ```sh
    git clone https://github.com/juhis-o/cli-chess.git
    cd cli-chess
