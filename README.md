@@ -3,7 +3,7 @@ cli-chess is basic chess which is played in command-line-interface. cli-chess su
 Binaries are available at releases.
 ![Cli-chess-preview image](https://i.imgur.com/JTqqUNg.png)
 ## Requirements
-- Atleast C++14 Compiler
+- At least C++14 Compiler
 - ncurses and g++ for linux or PDCurse and Microsoft C++ toolset for Windows, which are available by installing vscode and installing C/C++ extension
 
 ## Compiling
